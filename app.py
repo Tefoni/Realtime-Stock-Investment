@@ -103,6 +103,7 @@ def sellStock():
         request_body = request.get_json()
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
+        old_cost = stock.average_cost
         date_format = "%Y-%m-%d"
         date = datetime.strptime(request_body["date"],date_format).date()
         if(date > datetime.now().date()):
@@ -130,7 +131,7 @@ def sellStock():
             db.session.merge(stock)
             db.session.commit()
 
-            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 0, createDate = date)
+            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 0, createDate = date, closeProfitValue = profitValue, stockCost = old_cost)
             db.session.add(transactionHistory)
 
         else:
@@ -184,11 +185,64 @@ def getTransactionHistories():
         with concurrent.futures.ThreadPoolExecutor() as executor:
             response = list(executor.map(getTransactionHistory, transactionhistories))
 
-        return jsonify(response)
+        return jsonify({
+            "isSuccesful": True,
+            "message": response
+        })
     except Exception as e:
         return jsonify({"message": str(e),
                        "isSuccesful": False}) 
 
+
+@app.route('/deleteTransaction',methods=['POST'])
+@jwt_required()
+def deleteTransaction():
+    try:
+        transaction_id = request.get_json()["transactionId"]
+        transaction = TransactionHistory.query.filter(TransactionHistory.id == transaction_id).first()
+        stock = Stocks.query.filter(Stocks.id == transaction.stockId).first()
+        portfolio = getPortfolioById(stock.portfolioId)
+        if transaction.transactionType == 1:    # BUY
+            newStock_cost = ( (stock.amount*stock.average_cost)- transaction.amount*transaction.price )
+            stock.amount -= transaction.amount
+            newStock_cost /= stock.amount
+            stock.average_cost = newStock_cost
+            stock.updateDate = datetime.now().date()
+            #Update stock with new values
+            db.session.merge(stock)
+            db.session.commit()
+            response = f"{transaction.price} fiyatından alınmış {transaction.amount} adet {stock.symbol} hisse alımı iptal edildi."
+            #Delete Transaction history
+            deletedTransaction = TransactionHistory.query.get(transaction_id)
+            db.session.delete(deletedTransaction)
+            db.session.commit()     
+
+        else:                                   # SELL
+            portfolio.closedPositionValue -= transaction.closeProfitValue
+            newStock_cost = ( (stock.amount*stock.average_cost) + (transaction.amount*transaction.stockCost) )
+            stock.amount += transaction.amount
+            newStock_cost /= stock.amount
+            stock.average_cost = newStock_cost
+            stock.updateDate = datetime.now().date()
+            #Update stock with new values
+            db.session.merge(stock)
+            db.session.commit()
+            response = f"{transaction.price} fiyatından satılmış {transaction.amount} adet {stock.symbol} hisse satışı iptal edildi."
+            #Delete Transaction history
+            deletedTransaction = TransactionHistory.query.get(transaction_id)
+            db.session.delete(deletedTransaction)
+            db.session.commit()
+            #Update portfolio with new close position value
+            db.session.merge(portfolio)
+            db.session.commit()                 
+
+        return jsonify({
+            "isSuccessful": True,
+            "message": response
+        })
+    except Exception as e:
+        return jsonify({"message": str(e),
+                       "isSuccesful": False}) 
 
 @app.route('/portfolio',methods=['POST'])
 @jwt_required()
@@ -262,14 +316,21 @@ def login():
 @app.route('/userPortfolioIds',methods=['GET'])
 @jwt_required()
 def getUserPortfolioIds():
-    user_email = get_jwt_identity()
-    user = User.query.filter(User.email == user_email).first()
-    portfolios = Portfolio.query.filter(Portfolio.userId == user.id).all()
-    portfolioIds = []
-    for i in range(len(portfolios)):
-        portfolioIds.append(portfolios[i].id)
+    try:
+        user_email = get_jwt_identity()
+        user = User.query.filter(User.email == user_email).first()
+        portfolios = Portfolio.query.filter(Portfolio.userId == user.id).all()
+        portfolioIds = []
+        for i in range(len(portfolios)):
+            portfolioIds.append(portfolios[i].id)
 
-    return jsonify(portfolioIds)
+        return jsonify({
+            "isSuccesful": True,
+            "message": portfolioIds
+        })
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccesful": False})  
 
 
 @app.route('/user',methods=['GET'])

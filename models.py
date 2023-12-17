@@ -56,7 +56,9 @@ class TransactionHistory(db.Model):
     portfolioId = db.Column(db.Integer, db.ForeignKey('portfolio.id'), nullable=False)
     createDate = db.Column(db.DateTime(timezone = True), default= datetime.now())
     transactionType = db.Column(db.Integer, nullable= False)
+    #Bottom 2 values fill when Transaction type is SELL
+    closeProfitValue = db.Column(db.Float)
+    stockCost = db.Column(db.Float)
     def __repr__(self):
-        self.type = "BUY" if self.transactionType == 1 else "SELL"
         return f'<Transaction: Id({self.id}) StockId({self.stockId}) Amount({self.amount}) Price({self.price}) PortfolioId({self.portfolioId}) CreateDate({self.createDate}) TransactionType({self.transactionType})>\n'
     
