@@ -56,8 +56,7 @@ class TransactionHistory(db.Model):
     portfolioId = db.Column(db.Integer, db.ForeignKey('portfolio.id'), nullable=False)
     createDate = db.Column(db.DateTime(timezone = True), default= datetime.now())
     transactionType = db.Column(db.Integer, nullable= False)
-
-    type = "BUY" if transactionType == 1 else "SELL"
     def __repr__(self):
-        return f'<Transaction: Id({self.id}) StockId({self.stockId}) Amount({self.amount}) Price({self.price}) PortfolioId({self.portfolioId}) CreateDate({self.createDate}) TransactionType({self.type})>\n'
+        self.type = "BUY" if self.transactionType == 1 else "SELL"
+        return f'<Transaction: Id({self.id}) StockId({self.stockId}) Amount({self.amount}) Price({self.price}) PortfolioId({self.portfolioId}) CreateDate({self.createDate}) TransactionType({self.transactionType})>\n'
     

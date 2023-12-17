@@ -22,6 +22,11 @@ def getPortfolioStock(stock):
     stock_market_value = stock_response['lastPrice'] * stock.amount
     net_stock_profit = (stock_response['lastPrice'] - stock.average_cost) * stock.amount
     daily_stock_profit = (stock_response['lastPrice'] - stock_response['regularMarketPreviousClose']) * stock.amount
+    dailyStockPercentageProfit = (stock_response["lastPrice"] - stock_response["regularMarketPreviousClose"]) / stock_response["regularMarketPreviousClose"] * 100
+    if str(stock_response['regularMarketPreviousClose']) == "nan":
+        daily_stock_profit = 0
+        dailyStockPercentageProfit = 0
+    
     return {
         "symbol": stock.symbol,
         "amount": stock.amount,
@@ -29,11 +34,33 @@ def getPortfolioStock(stock):
         "lastPrice": round(stock_response['lastPrice'], 2),
         "marketValue": round(stock_market_value, 2),
         "dailyStockProfit": round(daily_stock_profit, 2),
-        "dailyStockPercentageProfit": round((stock_response["lastPrice"] - stock_response["regularMarketPreviousClose"]) / stock_response["regularMarketPreviousClose"] * 100, 2),
+        "dailyStockPercentageProfit": round(dailyStockPercentageProfit, 2),
         "netStockProfit": round(net_stock_profit, 2),
-        "netStockProfitPercentage": round((stock_response["lastPrice"] - stock.average_cost) / stock.average_cost * 100, 2)
+        "netStockProfitPercentage": round((stock_response["lastPrice"] - stock.average_cost) / stock.average_cost * 100, 2),
+        "stockId": stock.id
     }
 
+def getTransactionHistory(transactionHistory):
+    with app.app_context(): 
+        stock = Stocks.query.filter(Stocks.id == transactionHistory.stockId).first()
+    stock_response = yf.Ticker(stock.symbol).basic_info
+    transaction_market_value = stock_response['lastPrice'] * transactionHistory.amount
+    net_transaction_profit = (stock_response['lastPrice'] - transactionHistory.price) * transactionHistory.amount
+    daily_transaction_profit = (stock_response['lastPrice'] - stock_response['regularMarketPreviousClose']) * transactionHistory.amount
+    return{
+        "symbol": stock.symbol,
+        "openDate": transactionHistory.createDate.date(),
+        "type": "BUY" if transactionHistory.transactionType == 1 else "SELL",
+        "amount": transactionHistory.amount,
+        "openPrice": transactionHistory.price,
+        "lastPrice": round(stock_response['lastPrice'], 2),
+        "marketValue": transaction_market_value,
+        "dailyTransactionProfit": round(daily_transaction_profit, 2),
+        "dailyTransactionPercentageProfit": round((stock_response["lastPrice"] - stock_response["regularMarketPreviousClose"]) / stock_response["regularMarketPreviousClose"] * 100, 2),
+        "netTransactionProfit": round(net_transaction_profit, 2),
+        "netTransactionProfitPercentage": round((stock_response["lastPrice"] - transactionHistory.price) / transactionHistory.price * 100, 2),
+        "transactionId": transactionHistory.id
+    }
 
 def profitHistoryof_stocks(stocks):
     response = []

@@ -47,7 +47,10 @@ def buyStock():
         request_body = request.get_json()
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
-
+        date_format = "%Y-%m-%d"
+        date = datetime.strptime(request_body["date"],date_format).date()
+        if(date > datetime.now().date()):
+            raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
         if stock:
             if not isinstance(request_body["amount"], int) or request_body["amount"] <= 0:
                 raise ValueError("Alınan hisse adedi pozitif tam sayı olmalıdır.")
@@ -60,21 +63,21 @@ def buyStock():
 
             stock.amount = newAmount
             stock.average_cost = newCost
-            stock.updateDate = datetime.now()
+            stock.updateDate = date
             db.session.merge(stock)
             db.session.commit()
 
-            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 1)
+            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 1, createDate = date)
             db.session.add(transactionHistory)
 
         else:
             new_stockResponse = yf.Ticker(request.get_json()["symbol"]).basic_info
             giveExceptionIfNotExist = new_stockResponse['lastPrice']
 
-            new_stock = Stocks(portfolio = user_portfolio,symbol = request_body["symbol"],amount = request_body["amount"],average_cost = request_body["cost"])
+            new_stock = Stocks(portfolio = user_portfolio,symbol = request_body["symbol"],amount = request_body["amount"],average_cost = request_body["cost"],createDate = date)
             db.session.add(new_stock)
 
-            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = new_stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 1)
+            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = new_stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 1, createDate = date)
             db.session.add(transactionHistory)
 
 
@@ -100,6 +103,10 @@ def sellStock():
         request_body = request.get_json()
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
+        date_format = "%Y-%m-%d"
+        date = datetime.strptime(request_body["date"],date_format).date()
+        if(date > datetime.now().date()):
+            raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
 
         if stock:
             if not isinstance(request_body["amount"], int) or request_body["amount"] <= 0:
@@ -116,14 +123,14 @@ def sellStock():
             db.session.commit()
 
             stock.amount = newAmount
-            stock.updateDate = datetime.now()
+            stock.updateDate = date
             if newAmount == 0:
                 stock.average_cost = 0
 
             db.session.merge(stock)
             db.session.commit()
 
-            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 0)
+            transactionHistory = TransactionHistory(portfolio = user_portfolio, stocks = stock, amount = request_body["amount"], price = request_body["cost"], transactionType = 0, createDate = date)
             db.session.add(transactionHistory)
 
         else:
@@ -166,6 +173,22 @@ def profitHistory():
         return jsonify({"message": str(e),
                        "isSuccesful": False})
           
+
+@app.route('/transactionHistory',methods=['POST'])
+@jwt_required()
+def getTransactionHistories():
+    try:
+        portfolio_id = request.get_json()["portfolioId"]
+        transactionhistories = TransactionHistory.query.filter(TransactionHistory.portfolioId == portfolio_id,TransactionHistory.amount > 0, TransactionHistory.price > 0).all()
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            response = list(executor.map(getTransactionHistory, transactionhistories))
+
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"message": str(e),
+                       "isSuccesful": False}) 
+
 
 @app.route('/portfolio',methods=['POST'])
 @jwt_required()
@@ -236,7 +259,7 @@ def login():
                        "isSuccesful": False})
 
 
-@app.route('/getUserPortfolioIds',methods=['GET'])
+@app.route('/userPortfolioIds',methods=['GET'])
 @jwt_required()
 def getUserPortfolioIds():
     user_email = get_jwt_identity()
@@ -248,8 +271,14 @@ def getUserPortfolioIds():
 
     return jsonify(portfolioIds)
 
-#GET CURRENT USER YAP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+@app.route('/user',methods=['GET'])
+@jwt_required()
+def getCurrentUser():
+    user_email = get_jwt_identity()
+    user = User.query.filter(User.email == user_email).first()
+    return jsonify(user.name) 
+ 
 # Customize response for invalid token
 @jwt.invalid_token_loader
 @jwt.unauthorized_loader
