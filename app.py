@@ -34,12 +34,6 @@ def test():
     db.session.commit()
     return jsonify({"test":"test2"})
 
-# EDIT  TRANSACTİON
-# DELETE TRANSACTİON
-# GET PORTFOLİO STOKCKS ID DE YOLLARSIN
-# GET TRANSACTİON HİSTORY ID DE YOLLARSIN
-
-
 @app.route('/buyStock',methods=['POST'])
 @jwt_required()
 def buyStock():
