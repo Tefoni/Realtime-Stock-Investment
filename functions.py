@@ -13,6 +13,10 @@ def getPortfolioById(portfolioId):
     with app.app_context():
       return Portfolio.query.filter_by(id = portfolioId).first()
 
+def getStocksByPortfolioId(_portfolioId):
+    with app.app_context():
+        return Stocks.query.filter(Stocks.portfolioId == _portfolioId,Stocks.amount > 0).all()
+
 def getStockByPortfolioId(_portfolioId,stockSymbol):
     with app.app_context():   
       return Stocks.query.filter(Stocks.portfolioId == _portfolioId,Stocks.symbol == stockSymbol).first()
@@ -39,6 +43,12 @@ def getPortfolioStock(stock):
         "netStockProfitPercentage": round((stock_response["lastPrice"] - stock.average_cost) / stock.average_cost * 100, 2),
         "stockId": stock.id
     }
+
+def getMarketValueDistribution(stock):
+    stock_response = yf.Ticker(stock.symbol).basic_info
+    stock_market_value = stock_response['lastPrice'] * stock.amount
+    return {"symbol": stock.symbol,
+            "marketValue": stock_market_value}
 
 def getTransactionHistory(transactionHistory):
     with app.app_context(): 
@@ -69,8 +79,9 @@ def profitHistoryof_stocks(stocks):
         data = yf.download(stock.symbol, start=stock.createDate, end=datetime.now())
         stock_profits = []
         for row in data.iloc:
-            stockProfit = (row.Close - stock.average_cost) * stock.amount
-            #stockProfit = (row.Close - getAverageCostFromDate(row.name.date(),Stock)) - getStockAmountFromDate(date,Stock)
+            #stockProfit = (row.Close - stock.average_cost) * stock.amount
+            average_cost,amount = getCurrentDateValuesForStock(row.name.date(),stock)
+            stockProfit = (row.Close - average_cost) * amount
             # üstteki get fonksiyonun için transactionhistory createDate <= get... ise dahil et yaparsn, 2 fonksiyonu birleştirirsn
             stock_profits.append({
                     "date": str(row.name.date()),
@@ -87,5 +98,23 @@ def profitHistoryof_stocks(stocks):
 
     return response
 
+def getCurrentDateValuesForStock(date,stock):
+    amount = 0
+    average_cost = 0
+    total_MarketValue = 0
+    with app.app_context(): 
+        transactions = TransactionHistory.query.filter(TransactionHistory.stockId == stock.id).all()
+
+    for transaction in transactions:
+        if transaction.transactionType == 1 and transaction.createDate.date() <= date:    #BUY
+                amount+= transaction.amount
+                total_MarketValue += transaction.amount * transaction.price
+
+        elif transaction.transactionType == 0 and transaction.createDate.date() <= date:   #SELL
+                amount -= transaction.amount
+                total_MarketValue -= transaction.amount * transaction.stockCost
+
+    average_cost = total_MarketValue/amount  
+    return average_cost,amount
       
     

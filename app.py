@@ -158,7 +158,7 @@ def sellStock():
 def profitHistory():
     try:
         user_portfolio = getPortfolioById(request.get_json()['portfolioId'])
-        portfolio_stocks = Stocks.query.filter(Stocks.portfolioId == request.get_json()['portfolioId'],Stocks.amount > 0).all()
+        portfolio_stocks = getStocksByPortfolioId(request.get_json()['portfolioId'])
         start_dateofPortfolio = Stocks.query.filter(Stocks.portfolioId == user_portfolio.id).order_by(Stocks.createDate.asc()).first().createDate.date()
         end_dateofPortfolio = datetime.now().date()
 
@@ -170,6 +170,39 @@ def profitHistory():
                         "endDate": end_dateofPortfolio,
                         "stocks": stock_infos,
                         "isSuccesful": True})
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccesful": False})
+    
+@app.route('/marketValueHistory',methods=['POST'])
+@jwt_required()
+def marketValueHistory():
+    try:
+        return jsonify(1)
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccesful": False})
+    
+@app.route('/stockDistribution',methods=['POST'])
+@jwt_required()
+def stockDistribution():
+    try:
+        stocks = getStocksByPortfolioId(request.get_json()['portfolioId'])
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            distributions = list(executor.map(getMarketValueDistribution, stocks))
+
+        totalMarket_Value = sum(distribution["marketValue"] for distribution in distributions)
+        response = []  
+        for distribution in distributions:
+            response.append({
+                "symbol": distribution["symbol"],
+                "distribution":  round(distribution["marketValue"]/totalMarket_Value*100, 2)
+            })
+
+        return jsonify({
+            "isSuccesful": True,
+            "message": response
+        })
     except Exception as e: 
         return jsonify({"message": str(e),
                        "isSuccesful": False})
@@ -249,7 +282,7 @@ def deleteTransaction():
 def portfolio():
     try:
         portfolio_id = request.get_json()["portfolioId"]
-        portfolio_stocks = Stocks.query.filter(Stocks.portfolioId == portfolio_id,Stocks.amount > 0).all()
+        portfolio_stocks = getStocksByPortfolioId(portfolio_id)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             stock_infos = list(executor.map(getPortfolioStock, portfolio_stocks))
