@@ -34,7 +34,7 @@ def getPortfolioStock(stock):
     return {
         "symbol": stock.symbol,
         "amount": stock.amount,
-        "average_cost": stock.average_cost,
+        "average_cost": round(stock.average_cost,2),
         "lastPrice": round(stock_response['lastPrice'], 2),
         "marketValue": round(stock_market_value, 2),
         "dailyStockProfit": round(daily_stock_profit, 2),
