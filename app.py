@@ -56,7 +56,7 @@ def buyStock():
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
         date_format = "%Y-%m-%dT21:00:00.000Z"
-        date = datetime.strptime(request_body["date"],date_format).date()
+        date = datetime.strptime(request_body["date"],date_format).date() + timedelta(days=1)
         if(date > datetime.now().date()):
             raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
         if stock:
@@ -225,7 +225,7 @@ def getTransactionHistories():
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             response = list(executor.map(getTransactionHistory, transactionhistories))
-
+        response = sorted(response, key=lambda x: x['openDate'], reverse=True)
         return jsonify({
             "isSuccessful": True,
             "message": response

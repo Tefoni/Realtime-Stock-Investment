@@ -64,7 +64,7 @@ def getTransactionHistory(transactionHistory):
         "amount": transactionHistory.amount,
         "openPrice": transactionHistory.price,
         "lastPrice": round(stock_response['lastPrice'], 2),
-        "marketValue": transaction_market_value,
+        "marketValue": round(transaction_market_value,2),
         "dailyTransactionProfit": round(daily_transaction_profit, 2),
         "dailyTransactionPercentageProfit": round((stock_response["lastPrice"] - stock_response["regularMarketPreviousClose"]) / stock_response["regularMarketPreviousClose"] * 100, 2),
         "netTransactionProfit": round(net_transaction_profit, 2),
