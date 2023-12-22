@@ -11,7 +11,8 @@ import concurrent.futures
 from flask_cors import CORS
 import matplotlib.pyplot as plt
 import time
-
+import requests
+from bs4 import BeautifulSoup
 
 
 
@@ -27,12 +28,25 @@ jwt = JWTManager(app)
 
 db.init_app(app)
 
-@app.route('/test',methods=['POST'])
-def test():
-    transaction = TransactionHistory.query.get(16)
-    db.session.delete(transaction)
-    db.session.commit()
-    return jsonify({"test":"test2"})
+@app.route('/stockSymbols',methods=['GET'])
+@jwt_required()
+def stockSymbols():
+    try:
+        url = 'https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/default.aspx'
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        rows = soup.find('table',{"data-csvname": "tumhisse"}).find('tbody').find_all('a')
+
+        names = [stock.text for stock in rows]
+
+        cleaned_names = [name.strip().replace("\r\n","") for name in names]
+        cleaned_names = [name for name in cleaned_names if name.isalpha()]
+        cleaned_names_with_extension = [name + ".IS" for name in cleaned_names]
+        return jsonify({"message": cleaned_names_with_extension,
+                        "isSuccessful": True})
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccessful": False})
 
 @app.route('/buyStock',methods=['POST'])
 @jwt_required()
@@ -41,7 +55,7 @@ def buyStock():
         request_body = request.get_json()
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
-        date_format = "%Y-%m-%d"
+        date_format = "%Y-%m-%dT21:00:00.000Z"
         date = datetime.strptime(request_body["date"],date_format).date()
         if(date > datetime.now().date()):
             raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
@@ -98,7 +112,7 @@ def sellStock():
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
         old_cost = stock.average_cost
-        date_format = "%Y-%m-%d"
+        date_format = "%Y-%m-%dT21:00:00.000Z"
         date = datetime.strptime(request_body["date"],date_format).date()
         if(date > datetime.now().date()):
             raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
