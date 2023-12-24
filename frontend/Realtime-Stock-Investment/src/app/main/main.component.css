@@ -1,0 +1,31 @@
+.positive-color {
+  font-weight: bold;
+  color: green;
+}
+
+.negative-color {
+  font-weight: bold;
+  color: red;
+}
+
+.bold-text{
+  font-weight: bolder;
+}
+
+.data-display {
+  display: flex;
+  justify-content: left;
+}
+
+.data-item {
+  text-align: center;
+  margin-right: 5%;
+}
+
+.data-label {
+  font-weight: bold;
+}
+
+.data-value {
+  margin-top: 5px;
+}
