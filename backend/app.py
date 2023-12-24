@@ -37,7 +37,7 @@ def stockSymbols():
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find('table',{"data-csvname": "tumhisse"}).find('tbody').find_all('a')
 
-        names = [stock.text for stock in rows]
+        names =[stock.text for stock in rows]
 
         cleaned_names = [name.strip().replace("\r\n","") for name in names]
         cleaned_names = [name for name in cleaned_names if name.isalpha()]
