@@ -11,7 +11,8 @@ import concurrent.futures
 from flask_cors import CORS
 import matplotlib.pyplot as plt
 import time
-
+import requests
+from bs4 import BeautifulSoup
 
 
 
@@ -27,12 +28,25 @@ jwt = JWTManager(app)
 
 db.init_app(app)
 
-@app.route('/test',methods=['POST'])
-def test():
-    transaction = TransactionHistory.query.get(16)
-    db.session.delete(transaction)
-    db.session.commit()
-    return jsonify({"test":"test2"})
+@app.route('/stockSymbols',methods=['GET'])
+@jwt_required()
+def stockSymbols():
+    try:
+        url = 'https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/default.aspx'
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        rows = soup.find('table',{"data-csvname": "tumhisse"}).find('tbody').find_all('a')
+
+        names = [stock.text for stock in rows]
+
+        cleaned_names = [name.strip().replace("\r\n","") for name in names]
+        cleaned_names = [name for name in cleaned_names if name.isalpha()]
+        cleaned_names_with_extension = [name + ".IS" for name in cleaned_names]
+        return jsonify({"message": cleaned_names_with_extension,
+                        "isSuccessful": True})
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccessful": False})
 
 @app.route('/buyStock',methods=['POST'])
 @jwt_required()
@@ -41,8 +55,8 @@ def buyStock():
         request_body = request.get_json()
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
-        date_format = "%Y-%m-%d"
-        date = datetime.strptime(request_body["date"],date_format).date()
+        date_format = "%Y-%m-%dT21:00:00.000Z"
+        date = datetime.strptime(request_body["date"],date_format).date() + timedelta(days=1)
         if(date > datetime.now().date()):
             raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
         if stock:
@@ -80,7 +94,7 @@ def buyStock():
         response = f"{request_body['cost']} fiyatından {request_body['amount']} adet {str.upper(request_body['symbol'])} kodlu hisse başarıyla portfolyeye eklendi."
 
         return jsonify({"message": response,
-                        "isSuccesful": True})
+                        "isSuccessful": True})
     except Exception as e:
         db.session.rollback()
 
@@ -88,7 +102,7 @@ def buyStock():
             e = "Bu sembole sahip hisse bulunamadı."
 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})
+                       "isSuccessful": False})
 
 @app.route('/sellStock',methods=['POST'])
 @jwt_required()
@@ -98,7 +112,7 @@ def sellStock():
         user_portfolio = getPortfolioById(request_body["portfolioId"])
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
         old_cost = stock.average_cost
-        date_format = "%Y-%m-%d"
+        date_format = "%Y-%m-%dT21:00:00.000Z"
         date = datetime.strptime(request_body["date"],date_format).date()
         if(date > datetime.now().date()):
             raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
@@ -137,7 +151,7 @@ def sellStock():
         response = f"{request_body['cost']} fiyatından {request_body['amount']} adet {str.upper(request_body['symbol'])} kodlu hisse başarıyla satıldı."
 
         return jsonify({"message": response,
-                        "isSuccesful": True})
+                        "isSuccessful": True})
     except Exception as e:
         db.session.rollback()
 
@@ -145,7 +159,7 @@ def sellStock():
             e = "Bu sembole sahip hisse bulunamadı."
 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})
+                       "isSuccessful": False})
 
 @app.route('/profitHistory',methods=['POST'])
 @jwt_required()
@@ -163,10 +177,10 @@ def profitHistory():
         return jsonify({"startDate": start_dateofPortfolio,
                         "endDate": end_dateofPortfolio,
                         "stocks": stock_infos,
-                        "isSuccesful": True})
+                        "isSuccessful": True})
     except Exception as e: 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})
+                       "isSuccessful": False})
     
 @app.route('/marketValueHistory',methods=['POST'])
 @jwt_required()
@@ -175,7 +189,7 @@ def marketValueHistory():
         return jsonify(1)
     except Exception as e: 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})
+                       "isSuccessful": False})
     
 @app.route('/stockDistribution',methods=['POST'])
 @jwt_required()
@@ -194,12 +208,12 @@ def stockDistribution():
             })
 
         return jsonify({
-            "isSuccesful": True,
+            "isSuccessful": True,
             "message": response
         })
     except Exception as e: 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})
+                       "isSuccessful": False})
           
 
 @app.route('/transactionHistory',methods=['POST'])
@@ -211,14 +225,14 @@ def getTransactionHistories():
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             response = list(executor.map(getTransactionHistory, transactionhistories))
-
+        response = sorted(response, key=lambda x: x['openDate'], reverse=True)
         return jsonify({
-            "isSuccesful": True,
+            "isSuccessful": True,
             "message": response
         })
     except Exception as e:
         return jsonify({"message": str(e),
-                       "isSuccesful": False}) 
+                       "isSuccessful": False}) 
 
 
 @app.route('/deleteTransaction',methods=['POST'])
@@ -269,7 +283,7 @@ def deleteTransaction():
         })
     except Exception as e:
         return jsonify({"message": str(e),
-                       "isSuccesful": False}) 
+                       "isSuccessful": False}) 
 
 @app.route('/portfolio',methods=['POST'])
 @jwt_required()
@@ -296,7 +310,7 @@ def portfolio():
 
     except Exception as e:
         return jsonify({"message": str(e),
-                       "isSuccesful": False}) 
+                       "isSuccessful": False}) 
     
 @app.route('/signUp',methods=['POST'])
 def signUp():
@@ -320,7 +334,7 @@ def signUp():
                         "isSuccessful": True})
     except Exception as e: 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})
+                       "isSuccessful": False})
 
 
 @app.route('/login',methods=['POST'])
@@ -331,13 +345,13 @@ def login():
         if user and check_password_hash(user.password,request_body["password"]):
             access_token = create_access_token(identity= user.email)
             return jsonify({"token": access_token,
-                            "isSuccesful": True})
+                            "isSuccessful": True})
         else:
             raise Exception("Email veya şifre yanlış.Tekrar deneyiniz.")
 
     except Exception as e: 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})
+                       "isSuccessful": False})
 
 
 @app.route('/userPortfolioIds',methods=['GET'])
@@ -352,12 +366,12 @@ def getUserPortfolioIds():
             portfolioIds.append(portfolios[i].id)
 
         return jsonify({
-            "isSuccesful": True,
+            "isSuccessful": True,
             "message": portfolioIds
         })
     except Exception as e: 
         return jsonify({"message": str(e),
-                       "isSuccesful": False})  
+                       "isSuccessful": False})  
 
 
 @app.route('/user',methods=['GET'])
@@ -372,12 +386,12 @@ def getCurrentUser():
 @jwt.unauthorized_loader
 def invalid_token(error):
     return jsonify({"message": "Geçersiz token.",
-                    "isSuccesful": False}), 401
+                    "isSuccessful": False}), 401
 
 @jwt.expired_token_loader
 def expired_token(error,error2):
     return jsonify({"message": "Süresi geçmiş token.",
-                    "isSuccesful": False}), 401
+                    "isSuccessful": False}), 401
 
 if __name__ == '__main__':
     with app.app_context():

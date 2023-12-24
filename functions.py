@@ -34,7 +34,7 @@ def getPortfolioStock(stock):
     return {
         "symbol": stock.symbol,
         "amount": stock.amount,
-        "average_cost": stock.average_cost,
+        "average_cost": round(stock.average_cost,2),
         "lastPrice": round(stock_response['lastPrice'], 2),
         "marketValue": round(stock_market_value, 2),
         "dailyStockProfit": round(daily_stock_profit, 2),
@@ -64,7 +64,7 @@ def getTransactionHistory(transactionHistory):
         "amount": transactionHistory.amount,
         "openPrice": transactionHistory.price,
         "lastPrice": round(stock_response['lastPrice'], 2),
-        "marketValue": transaction_market_value,
+        "marketValue": round(transaction_market_value,2),
         "dailyTransactionProfit": round(daily_transaction_profit, 2),
         "dailyTransactionPercentageProfit": round((stock_response["lastPrice"] - stock_response["regularMarketPreviousClose"]) / stock_response["regularMarketPreviousClose"] * 100, 2),
         "netTransactionProfit": round(net_transaction_profit, 2),
