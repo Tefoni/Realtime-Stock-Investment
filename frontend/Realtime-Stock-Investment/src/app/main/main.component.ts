@@ -14,7 +14,7 @@ import { DatePipe } from '@angular/common';
 })
 
 export class MainComponent {
-  portfolioIds: number[] = [];
+  portfolioIds: number[] =[];
   currentPortfolioId: number = 0;
   currentSubTabIndex: number = 0;
   portfolioValues = {
