@@ -1,24 +1,37 @@
 import { Injectable,Component,Inject,OnInit,PLATFORM_ID  } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpInterceptor, HttpHandler, HttpErrorResponse, HttpRequest, HttpEvent } from '@angular/common/http';
+import { Observable, throwError  } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { MatSnackBar,MatSnackBarConfig } from '@angular/material/snack-bar';
 import { isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
-export class StockInvestmentService {
+export class StockInvestmentService implements HttpInterceptor  {
   private apiUrl = 'http://127.0.0.1:5000';
   private token = '';
   localStorageAvailable = false;
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar, @Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(private http: HttpClient, private snackBar: MatSnackBar, @Inject(PLATFORM_ID) private platformId: Object, private router: Router) {
     // Check if running in a browser environment before using localStorage
     if (isPlatformBrowser(this.platformId)) {
       this.localStorageAvailable = true;
       this.token = localStorage.getItem('token') ?? '';
     }
-      
+  }
+
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return next.handle(request).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          // When 401 status is detected, redirect user to login page
+          this.router.navigate(['/login']);
+        }
+        return throwError(error);
+      })
+    );
   }
 
   public login(email: string, password: string): Observable<any> {
@@ -121,5 +134,9 @@ export class StockInvestmentService {
       panelClass: [panelClass,customStyle],
     };
     this.snackBar.open(message,'',config);
+  }
+
+  public setToken(newToken: string){
+    this.token = newToken;
   }
 }

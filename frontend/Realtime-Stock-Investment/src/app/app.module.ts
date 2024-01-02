@@ -4,9 +4,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { SignupComponent } from './signup/signup.component';
 import { LoginComponent } from './login/login.component';
 import { MainComponent } from './main/main.component';
+import { StockInvestmentService } from './services/stock-investment.service';
 
 import { FormsModule,ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS  } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatTableModule } from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
@@ -55,6 +56,11 @@ export const routes: Routes = [
     MatDatepickerModule,
     MatNativeDateModule,
     DatePipe,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: StockInvestmentService,
+      multi: true
+    },
   ],
   bootstrap: [AppComponent]
 })

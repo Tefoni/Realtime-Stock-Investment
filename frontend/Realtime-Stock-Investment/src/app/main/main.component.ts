@@ -62,6 +62,7 @@ export class MainComponent {
         this.service.showSnackBar(response.message,'error');
       }
     });
+    /*
     interval(1000).subscribe(() => {
       if(this.currentPortfolioId != 0){
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
@@ -85,7 +86,7 @@ export class MainComponent {
           }
         });
       }
-    });
+    });*/
   }
 
   private filter(value:string) : string[] {

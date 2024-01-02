@@ -17,7 +17,8 @@ export class LoginComponent {
   login(){
     this.service.login(this.email, this.password).subscribe(response => {
       if(response.isSuccessful){
-        localStorage.setItem('token', response.token);
+        localStorage.setItem('token',response.token);
+        this.service.setToken(response.token);
         this.router.navigate(['/main']);
       }
       else{
