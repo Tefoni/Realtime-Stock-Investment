@@ -178,7 +178,7 @@ def profitHistory():
                         "endDate": end_dateofPortfolio,
                         "stocks": stock_infos,
                         "isSuccessful": True})
-    except Exception as e: 
+    except Exception as e:
         return jsonify({"message": str(e),
                        "isSuccessful": False})
     
@@ -246,7 +246,10 @@ def deleteTransaction():
         if transaction.transactionType == 1:    # BUY
             newStock_cost = ( (stock.amount*stock.average_cost)- transaction.amount*transaction.price )
             stock.amount -= transaction.amount
-            newStock_cost /= stock.amount
+            if stock.amount == 0:
+                newStock_cost = 0
+            else:
+                newStock_cost /= stock.amount
             stock.average_cost = newStock_cost
             stock.updateDate = datetime.now().date()
             #Update stock with new values
