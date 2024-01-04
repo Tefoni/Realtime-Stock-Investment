@@ -201,14 +201,31 @@
                 <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z % </th>
                 <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netTransactionProfitPercentage)"> {{element.netTransactionProfitPercentage}}% </td>
               </ng-container>
-            
+
+              <!-- Button Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="bold-text"></th>
+                <td mat-cell *matCellDef="let element">
+                  <button (click)="deleteTransaction(element)">Delete</button>
+                </td>
+              </ng-container>
+
               <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
             </table>         
           </mat-tab>
 
           <mat-tab [label] = "'İstatistikler'">
-            <h1>İstatistikler</h1>
+            <h1>Gelir (K/Z)</h1>
+            <div style="display: block;">
+              <canvas baseChart
+                      [datasets]="profitHistoryData"
+                      [labels]="profitHistoryDates"
+                      [legend]="true"
+                      [type]="'line'"
+                      [options]="profitChartOptions">
+              </canvas>
+            </div>
           </mat-tab>
 
         </mat-tab-group>

@@ -57,6 +57,20 @@ export class StockInvestmentService implements HttpInterceptor  {
     return new Observable<any>;
   }
 
+  public getProfitHistory(portfolioId: number): Observable<any>{
+    if(this.localStorageAvailable){
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`,
+      });
+      const options = {headers};
+      const body = {"portfolioId": portfolioId};
+  
+      return this.http.post(`${this.apiUrl}/profitHistory`,body,options);
+    }
+    return new Observable<any>;
+  }
+
   public getPortfolio(portfolioId: number): Observable<any>{
     if(this.localStorageAvailable){
       const headers = new HttpHeaders({
@@ -81,6 +95,20 @@ export class StockInvestmentService implements HttpInterceptor  {
       const body = {"portfolioId": portfolioId};
   
       return this.http.post(`${this.apiUrl}/transactionHistory`,body,options);
+    }
+    return new Observable<any>;
+  }
+
+  public deleteTransaction(transactionId: number): Observable<any>{
+    if(this.localStorageAvailable){
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`,
+      });
+      const options = {headers};
+      const body = {"transactionId": transactionId};
+  
+      return this.http.post(`${this.apiUrl}/deleteTransaction`,body,options);
     }
     return new Observable<any>;
   }

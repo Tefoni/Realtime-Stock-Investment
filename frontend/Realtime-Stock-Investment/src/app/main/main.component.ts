@@ -1,4 +1,4 @@
-import { Component,Inject,OnInit,PLATFORM_ID } from '@angular/core';
+import { Component,Inject,OnInit,PLATFORM_ID} from '@angular/core';
 import { Router } from '@angular/router';
 import { StockInvestmentService } from '../services/stock-investment.service';
 import { Observable, interval, map, startWith } from 'rxjs';
@@ -26,7 +26,7 @@ export class MainComponent {
   stocks = [];
   transactions = [];
   portfolioColumns: string[] = ['symbol', 'amount', 'average_cost', 'lastPrice', 'marketValue', 'dailyStockProfit', 'dailyStockPercentageProfit', 'netStockProfit', 'netStockProfitPercentage'];
-  transactionColumns: string[] = ['symbol', 'openDate','type', 'amount', 'openPrice', 'lastPrice', 'marketValue', 'dailyTransactionProfit', 'dailyTransactionPercentageProfit', 'netTransactionProfit', 'netTransactionProfitPercentage'];
+  transactionColumns: string[] = ['symbol', 'openDate','type', 'amount', 'openPrice', 'lastPrice', 'marketValue', 'dailyTransactionProfit', 'dailyTransactionPercentageProfit', 'netTransactionProfit', 'netTransactionProfitPercentage','actions'];
   formControl = new FormControl('');
   filterOptions!: Observable<string[]>;
   stockNames!: string[];
@@ -36,7 +36,9 @@ export class MainComponent {
     amount: new FormControl(),
     price: new FormControl(),
   });
-
+  profitHistoryDates!: string[];
+  profitHistoryData: any[] = [];
+  profitChartOptions: any;
   constructor(private router: Router, private service: StockInvestmentService, @Inject(PLATFORM_ID) private platformId: Object, public datePipe: DatePipe)
   {
     this.service.getUserPortfolioIds().subscribe(response => {
@@ -62,9 +64,8 @@ export class MainComponent {
         this.service.showSnackBar(response.message,'error');
       }
     });
-    /*
     interval(1000).subscribe(() => {
-      if(this.currentPortfolioId != 0){
+      if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
           if(response.isSuccessful){
             this.stocks = response.stocks;
@@ -86,7 +87,7 @@ export class MainComponent {
           }
         });
       }
-    });*/
+    });
   }
 
   private filter(value:string) : string[] {
@@ -127,7 +128,39 @@ export class MainComponent {
     }
     else if(this.currentSubTabIndex == 2){
       // İstatistik
+      this.setProfitHistoryChart();
     }
+  }
+
+  setProfitHistoryChart(){
+    this.service.getProfitHistory(this.currentPortfolioId).subscribe(response => {
+      if(response.isSuccessful){
+        this.profitHistoryDates = [];
+        this.profitHistoryData = [];
+        const maxLength = Math.max(...response.stocks.map((stock: { profits: string | any[]; }) => stock.profits.length));
+        this.profitHistoryDates = response.stocks.find((stock: { profits: string | any[]; }) => stock.profits.length === maxLength).profits.map((profit: { date: string; }) => profit.date);
+        for (let i = 0; i < response.stocks.length; i++) {
+          let profitValues = response.stocks[i].profits.map((item: { profit: number; }) => item.profit);
+          let extendedProfitValues = [...Array(maxLength - profitValues.length).fill(null), ...profitValues];
+          let color = this.getRandomColor();
+          this.profitHistoryData.push({ data: extendedProfitValues,
+                                        label: response.stocks[i].symbol,
+                                        borderColor: color,
+                                        backgroundColor: color,
+                                        pointRadius: 0,
+                                        borderWidth: 2});
+        }
+      }
+    });
+  }
+
+  getRandomColor(){
+    const letters = '456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * letters.length)];
+    }
+    return color;
   }
 
   changeRowColor(value: number)
@@ -176,5 +209,16 @@ export class MainComponent {
       }
       else
         this.formControl.setValue(this.stockName);
+  }
+
+  deleteTransaction(transaction: any){
+    this.service.deleteTransaction(transaction.transactionId).subscribe(response => {
+      if(response.isSuccessful){
+        this.service.showSnackBar(response.message,'success');
+      }
+      else{
+        this.service.showSnackBar(response.message,'error');
+      }
+    });
   }
 }
