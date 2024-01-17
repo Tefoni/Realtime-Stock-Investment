@@ -71,6 +71,20 @@ export class StockInvestmentService implements HttpInterceptor  {
     return new Observable<any>;
   }
 
+  public getStockDistribution(portfolioId: number): Observable<any>{
+    if(this.localStorageAvailable){
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`,
+      });
+      const options = {headers};
+      const body = {"portfolioId": portfolioId};
+  
+      return this.http.post(`${this.apiUrl}/stockDistribution`,body,options);
+    }
+    return new Observable<any>;
+  }
+
   public getPortfolio(portfolioId: number): Observable<any>{
     if(this.localStorageAvailable){
       const headers = new HttpHeaders({

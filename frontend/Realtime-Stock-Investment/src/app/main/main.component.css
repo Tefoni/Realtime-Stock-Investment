@@ -29,3 +29,86 @@
 .data-value {
   margin-top: 5px;
 }
+
+.buy-button {
+  background-color: #4CAF50; /* Yeşil arka plan */
+  border: none; /* Kenarlığı kaldır */
+  color: white; /* Yazı rengi beyaz */
+  padding: 10px 20px; /* İç boşluk */
+  text-align: center; /* Metni ortala */
+  text-decoration: none; /* Metin süslemesini kaldır */
+  display: inline-block; /* Butonu inline-block elemanı yap */
+  font-size: 16px; /* Yazı tipi boyutu */
+  margin: 4px 2px; /* Çevresindeki boşluk */
+  cursor: pointer; /* İmleç üzerine geldiğinde el simgesini göster */
+  border-radius: 4px; /* Kenarları hafif yuvarlaklaştır */
+  transition: background-color 0.2s; /* Arka plan rengi geçişi için animasyon */
+}
+
+.buy-button:hover {
+  background-color: #45a049; /* Üzerine gelindiğinde arka plan rengini koyulaştır */
+}
+
+
+.delete-button {
+  background-color: transparent; /* Şeffaf arka plan */
+  border: none; /* Kenarlığı kaldır */
+  cursor: pointer; /* İmleç üzerine geldiğinde el simgesini göster */
+  padding: 5px; /* İç boşluk */
+  display: inline-flex; /* İçeriğini ortala ve inline özelliğini koru */
+  align-items: center; /* Dikey olarak ortala */
+  justify-content: center; /* Yatay olarak ortala */
+}
+
+.delete-button:focus {
+  outline: none; /* Fokusta kenarlık çıkmasını engelle */
+}
+
+.delete-icon {
+  color: black; /* Çarpı işaretinin rengi */
+  font-size: 24px; /* Çarpı işaretinin boyutu */
+  font-weight: bold; /* İkonun kalın olmasını sağla */
+}
+
+.graph {
+  margin: auto;
+  width: 90%;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Butonları yatay olarak ortalar */
+  padding: 10px; /* İsteğe bağlı dış boşluk */
+}
+
+.time-filter-button {
+  background-color: transparent; /* Arka planı transparan yap */
+  color: rgb(179, 177, 177);
+  border: none; /* Kenarlıkları kaldır */
+  margin: 0 5px; /* Butonlar arası boşluk */
+  padding: 5px 10px; /* İç boşluk */
+  cursor: pointer; /* İmleç buton üzerindeyken el şeklini alır */
+  font-weight: bold; /* Yazı tipini kalın yap */
+  font-size: 16px;
+}
+
+.time-filter-button:focus {
+  outline: none; /* Fokus halindeki kenarlığı kaldır */
+  color: black;
+  text-decoration: underline;
+}
+
+.time-filter-button:hover {
+  text-decoration: underline; /* Üzerine gelindiğinde altını çiz */
+}
+
+.graph-container {
+  display: flex;
+  justify-content: space-between; /* Grafikleri sayfanın iki yanına yerleştirir */
+  flex-wrap: nowrap; /* Grafiklerin alt alta düşmesini engeller */
+  margin: auto;
+  width: 90%;
+  margin-bottom: 2%;
+}
+
+

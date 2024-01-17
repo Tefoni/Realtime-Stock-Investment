@@ -5,6 +5,7 @@ import { Observable, interval, map, startWith } from 'rxjs';
 import { FormControl,FormGroup  } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { DatePipe } from '@angular/common';
+import { ChartDataset, ChartOptions, Color, TooltipLabelStyle } from 'chart.js';
 
 
 @Component({
@@ -36,23 +37,40 @@ export class MainComponent {
     amount: new FormControl(),
     price: new FormControl(),
   });
+
+  isStatisticsPageFirstTime = true;
   profitHistoryDates!: string[];
   profitHistoryData: any[] = [];
-  profitChartOptions: any;
+  lastMonthProfitHistoryDates!: string[];
+  lastMonthProfitHistoryData : any[] = [];
+  lastWeekProfitHistoryDates!: string[];
+  lastWeekProfitHistoryData: any[] = [];
+  currentGraphDates!: string[];
+  currentGraphData: any[] = [];
+  viewMode!: string;
+  profitChartOptions: ChartOptions = this.getProfitChartOptions();
+
+  pieChartLabels: string[] = [];
+  pieChartData: number[] = [];
+  pieChartOptions: ChartOptions = this.getStockDistributionChartOptions();
   constructor(private router: Router, private service: StockInvestmentService, @Inject(PLATFORM_ID) private platformId: Object, public datePipe: DatePipe)
   {
+  }
+
+  ngOnInit()
+  { 
     this.service.getUserPortfolioIds().subscribe(response => {
       if(response.isSuccessful){
         this.portfolioIds = response.message;
+        this.currentPortfolioId = this.portfolioIds[0];
+        this.setProfitHistoryChart();
+        this.setStockDistribution();
       }
       else{
         this.service.showSnackBar(response.message,'error');
       }
     });
-  }
 
-  ngOnInit()
-  { 
     this.service.getStockSymbols().subscribe(response => {
       if(response.isSuccessful){
         this.stockNames = response.message;
@@ -64,6 +82,7 @@ export class MainComponent {
         this.service.showSnackBar(response.message,'error');
       }
     });
+    /*
     interval(1000).subscribe(() => {
       if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
@@ -88,6 +107,7 @@ export class MainComponent {
         });
       }
     });
+    */
   }
 
   private filter(value:string) : string[] {
@@ -126,10 +146,69 @@ export class MainComponent {
         }
       });
     }
-    else if(this.currentSubTabIndex == 2){
-      // İstatistik
+
+    if(this.currentSubTabIndex != 2){ // Set statistics at background
       this.setProfitHistoryChart();
+      this.setStockDistribution();
     }
+  }
+
+  getProfitChartOptions(): ChartOptions {
+    const chartOptions: ChartOptions = {
+      plugins: {
+        tooltip: {
+          position: 'nearest',
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+              labelColor: function(context) : TooltipLabelStyle {
+                let borderColor: Color = context.dataset.borderColor as Color || '#000';
+                let backgroundColor: Color = context.dataset.backgroundColor as Color || '#fff'; 
+                return {
+                  borderColor: borderColor,
+                  backgroundColor: backgroundColor,
+                };
+              },
+              label: function(tooltipItem){ 
+                var label = tooltipItem.dataset.label + ': '+ (tooltipItem.dataset?.data[tooltipItem.dataIndex] ?? ' ' );
+                return label;
+              }
+          }
+        }
+      },
+      hover: {
+        mode: 'nearest',
+        intersect: false
+      },
+      elements: {
+        point: {
+          radius: 4,
+          hitRadius: 10,
+          hoverRadius: 7,
+        }
+      },
+    }; 
+    return chartOptions;
+
+  }
+
+  getStockDistributionChartOptions(): ChartOptions {
+    const chartOptions : ChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false, // Chart'ın kendi aspect ratio'sunu korumasını engeller
+      // Chart'ın boyutlarını kontrol etmek için gereken diğer seçenekler
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          // Tooltip ayarları
+        }
+      },
+      // aspectRatio: 1, // Eğer bir aspect ratio belirlemek isterseniz
+    };
+
+    return chartOptions;
   }
 
   setProfitHistoryChart(){
@@ -137,6 +216,7 @@ export class MainComponent {
       if(response.isSuccessful){
         this.profitHistoryDates = [];
         this.profitHistoryData = [];
+        this.lastMonthProfitHistoryData = [];
         const maxLength = Math.max(...response.stocks.map((stock: { profits: string | any[]; }) => stock.profits.length));
         this.profitHistoryDates = response.stocks.find((stock: { profits: string | any[]; }) => stock.profits.length === maxLength).profits.map((profit: { date: string; }) => profit.date);
         for (let i = 0; i < response.stocks.length; i++) {
@@ -148,10 +228,73 @@ export class MainComponent {
                                         borderColor: color,
                                         backgroundColor: color,
                                         pointRadius: 0,
-                                        borderWidth: 2});
+                                        borderWidth: 4});                                 
+        }
+        
+        if(maxLength <= 30){
+         this.lastMonthProfitHistoryData = this.profitHistoryData;
+         this.lastMonthProfitHistoryDates = this.profitHistoryDates; 
+        }
+        else{
+          this.lastMonthProfitHistoryDates = this.profitHistoryDates.slice(-20);
+
+          for (let index = 0; index < this.profitHistoryData.length; index++) {
+            const element = JSON.parse(JSON.stringify(this.profitHistoryData[index]));
+            this.lastMonthProfitHistoryData.push(element);
+            this.lastMonthProfitHistoryData[index].data = element.data.slice(-20);
+          }
+        }
+
+        if(maxLength <= 7){
+          this.lastWeekProfitHistoryData = this.profitHistoryData;
+          this.lastWeekProfitHistoryDates = this.profitHistoryDates;
+        }
+        else{
+          this.lastWeekProfitHistoryDates = this.profitHistoryDates.slice(-5);
+
+          for (let index = 0; index < this.profitHistoryData.length; index++) {
+            const element = JSON.parse(JSON.stringify(this.profitHistoryData[index]));
+            this.lastWeekProfitHistoryData.push(element);
+            this.lastWeekProfitHistoryData[index].data = element.data.slice(-5);
+          }
+        }
+        this.viewMode = "max";
+        this.currentGraphData = this.profitHistoryData;
+        this.currentGraphDates = this.profitHistoryDates;
+      }
+    });
+  }
+
+  setStockDistribution() {
+    this.pieChartData = [];
+    this.pieChartLabels = [];
+
+    this.service.getStockDistribution(this.currentPortfolioId).subscribe(response => {
+      if(response.isSuccessful){
+        var stockDistribution = response.message;
+
+        for (let index = 0; index < stockDistribution.length; index++) {
+          this.pieChartLabels.push(stockDistribution[index].symbol);
+          this.pieChartData.push(stockDistribution[index].distribution);       
         }
       }
     });
+  }
+
+  toggleViewMode(event: string) {
+    if (event === 'lastWeek') {
+      this.viewMode = 'lastWeek';
+      this.currentGraphData = this.lastWeekProfitHistoryData;
+      this.currentGraphDates = this.lastWeekProfitHistoryDates;
+    } else if (event === 'lastMonth') {
+      this.viewMode = 'lastMonth';
+      this.currentGraphData = this.lastMonthProfitHistoryData;
+      this.currentGraphDates = this.lastMonthProfitHistoryDates;
+    } else if(event === 'max') {
+      this.viewMode = 'max';
+      this.currentGraphData = this.profitHistoryData;
+      this.currentGraphDates = this.profitHistoryDates;
+    }
   }
 
   getRandomColor(){
@@ -221,4 +364,13 @@ export class MainComponent {
       }
     });
   }
+
+  dateFilter: (date: Date | null) => boolean = (d: Date | null): boolean => {
+    if (d === null) {
+      return false; // Disallow null values (no selection)
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part to the start of the day
+    return d <= today; // Allow only days before today (inclusive)
+  };
 }

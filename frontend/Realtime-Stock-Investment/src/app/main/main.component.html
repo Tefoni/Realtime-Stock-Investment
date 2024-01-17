@@ -43,7 +43,7 @@
           <!-- Date Input -->
           <mat-form-field>
             <mat-label>Tarih</mat-label>
-            <input matInput [matDatepicker]="picker" [disabled]="!formControl.value" formControlName="date" />
+            <input matInput [matDatepicker]="picker" [matDatepickerFilter]="dateFilter" [readonly]="true" [disabled]="!formControl.value" formControlName="date" />
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
@@ -62,7 +62,7 @@
       
           <!-- BUY SELL Buttons -->
           <div>
-            <button mat-button color="primary" (click)="onBuyClick()" [disabled]="!formControl.value">BUY</button>
+            <button class="buy-button" mat-button color="primary" (click)="onBuyClick()" [disabled]="!formControl.value">BUY</button>
             <button mat-button color="warn" (click)="onSellClick()" [disabled]="!formControl.value">SELL</button>
           </div>
         </div>
@@ -206,7 +206,9 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef class="bold-text"></th>
                 <td mat-cell *matCellDef="let element">
-                  <button (click)="deleteTransaction(element)">Delete</button>
+                  <button class="delete-button" (click)="deleteTransaction(element)">
+                    <span class="delete-icon">&times;</span>
+                  </button>
                 </td>
               </ng-container>
 
@@ -216,15 +218,34 @@
           </mat-tab>
 
           <mat-tab [label] = "'İstatistikler'">
-            <h1>Gelir (K/Z)</h1>
-            <div style="display: block;">
-              <canvas baseChart
-                      [datasets]="profitHistoryData"
-                      [labels]="profitHistoryDates"
-                      [legend]="true"
-                      [type]="'line'"
-                      [options]="profitChartOptions">
-              </canvas>
+            <div  class="graph">
+              <h1 style="display: flex;justify-content: center;padding-top: 3%;">Gelir (K/Z)</h1>
+              <div style="display: flex;justify-content: center;" class="button-container">
+                <button class="time-filter-button" (click)="toggleViewMode('lastWeek')">1H</button>
+                <button class="time-filter-button" (click)="toggleViewMode('lastMonth')">1A</button>
+                <button class="time-filter-button" (click)="toggleViewMode('max')">Maks.</button>
+              </div>
+              <div>
+                <canvas baseChart
+                        [datasets]="currentGraphData"
+                        [labels]="currentGraphDates"
+                        [legend]="true"
+                        [type]="'line'"
+                        [options]="profitChartOptions">
+                </canvas>
+              </div>
+            </div>
+            <div style="margin: auto; width: 60%;">
+              <h1 style="display: flex;justify-content: center;padding-top: 3%;">Varlık Paylaşımı</h1>
+              <div>
+                <canvas baseChart
+                        [datasets]="[{ data: pieChartData }]"
+                        [labels]="pieChartLabels"
+                        [legend]="true"
+                        [type]="'pie'"
+                        [options]="pieChartOptions">
+                </canvas>
+              </div>
             </div>
           </mat-tab>
 
