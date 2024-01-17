@@ -113,7 +113,7 @@ def sellStock():
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
         old_cost = stock.average_cost
         date_format = "%Y-%m-%dT21:00:00.000Z"
-        date = datetime.strptime(request_body["date"],date_format).date()
+        date = datetime.strptime(request_body["date"],date_format).date() + timedelta(days=1)
         if(date > datetime.now().date()):
             raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
 
@@ -169,7 +169,6 @@ def profitHistory():
         portfolio_stocks = getStocksByPortfolioId(request.get_json()['portfolioId'])
         start_dateofPortfolio = Stocks.query.filter(Stocks.portfolioId == user_portfolio.id).order_by(Stocks.createDate.asc()).first().createDate.date()
         end_dateofPortfolio = datetime.now().date()
-
         #with concurrent.futures.ThreadPoolExecutor() as executor:
         #    stock_infos = list(executor.map(profitHistoryof_stocks, portfolio_stocks))
         stock_infos = profitHistoryof_stocks(portfolio_stocks)
@@ -244,6 +243,8 @@ def deleteTransaction():
         stock = Stocks.query.filter(Stocks.id == transaction.stockId).first()
         portfolio = getPortfolioById(stock.portfolioId)
         if transaction.transactionType == 1:    # BUY
+            if transaction.amount > stock.amount:
+                raise ValueError("Öncelikle satışı iptal etmelisiniz.")
             newStock_cost = ( (stock.amount*stock.average_cost)- transaction.amount*transaction.price )
             stock.amount -= transaction.amount
             if stock.amount == 0:
