@@ -30,6 +30,16 @@
   margin-top: 5px;
 }
 
+.stock-inputs {
+  display: flex;
+  align-items: center; /* Align items vertically */
+  gap: 8px; /* Add some space between the inputs and buttons */
+}
+
+.trade-buttons {
+  display: flex;
+  gap: 8px; /* Space between buttons */
+}
 .buy-button {
   background-color: #4CAF50; /* Yeşil arka plan */
   border: none; /* Kenarlığı kaldır */
@@ -43,12 +53,32 @@
   cursor: pointer; /* İmleç üzerine geldiğinde el simgesini göster */
   border-radius: 4px; /* Kenarları hafif yuvarlaklaştır */
   transition: background-color 0.2s; /* Arka plan rengi geçişi için animasyon */
+  margin-bottom: 24px;
 }
 
 .buy-button:hover {
   background-color: #45a049; /* Üzerine gelindiğinde arka plan rengini koyulaştır */
 }
 
+.sell-button {
+  background-color: #ff0000; /* Yeşil arka plan */
+  border: none; /* Kenarlığı kaldır */
+  color: white; /* Yazı rengi beyaz */
+  padding: 10px 20px; /* İç boşluk */
+  text-align: center; /* Metni ortala */
+  text-decoration: none; /* Metin süslemesini kaldır */
+  display: inline-block; /* Butonu inline-block elemanı yap */
+  font-size: 16px; /* Yazı tipi boyutu */
+  margin: 4px 2px; /* Çevresindeki boşluk */
+  cursor: pointer; /* İmleç üzerine geldiğinde el simgesini göster */
+  border-radius: 4px; /* Kenarları hafif yuvarlaklaştır */
+  transition: background-color 0.2s; /* Arka plan rengi geçişi için animasyon */
+  margin-bottom: 24px;
+}
+
+.sell-button:hover {
+  background-color: #8f0505; /* Üzerine gelindiğinde arka plan rengini koyulaştır */
+}
 
 .delete-button {
   background-color: transparent; /* Şeffaf arka plan */

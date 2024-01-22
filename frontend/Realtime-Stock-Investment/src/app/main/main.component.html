@@ -39,7 +39,7 @@
               <mat-option *ngFor = "let stockName of filterOptions | async" [value]="stockName">{{stockName}}</mat-option>
             </mat-autocomplete>
         </mat-form-field>
-        <div *ngIf="formControl.value">
+        <div class="stock-inputs" *ngIf="formControl.value">
           <!-- Date Input -->
           <mat-form-field>
             <mat-label>Tarih</mat-label>
@@ -61,9 +61,9 @@
           </mat-form-field>
       
           <!-- BUY SELL Buttons -->
-          <div>
+          <div class="trade-buttons">
             <button class="buy-button" mat-button color="primary" (click)="onBuyClick()" [disabled]="!formControl.value">BUY</button>
-            <button mat-button color="warn" (click)="onSellClick()" [disabled]="!formControl.value">SELL</button>
+            <button class="sell-button" mat-button color="warn" (click)="onSellClick()" [disabled]="!formControl.value">SELL</button>
           </div>
         </div>
       </form>
