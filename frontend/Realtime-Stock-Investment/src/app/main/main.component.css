@@ -29,3 +29,161 @@
 .data-value {
   margin-top: 5px;
 }
+
+.stock-inputs {
+  display: flex;
+  align-items: center; /* Align items vertically */
+  gap: 8px; /* Add some space between the inputs and buttons */
+}
+
+.trade-buttons {
+  display: flex;
+  gap: 8px; /* Space between buttons */
+}
+.buy-button {
+  background-color: #4CAF50; /* Yeşil arka plan */
+  border: none; /* Kenarlığı kaldır */
+  color: white; /* Yazı rengi beyaz */
+  padding: 10px 20px; /* İç boşluk */
+  text-align: center; /* Metni ortala */
+  text-decoration: none; /* Metin süslemesini kaldır */
+  display: inline-block; /* Butonu inline-block elemanı yap */
+  font-size: 16px; /* Yazı tipi boyutu */
+  margin: 4px 2px; /* Çevresindeki boşluk */
+  cursor: pointer; /* İmleç üzerine geldiğinde el simgesini göster */
+  border-radius: 4px; /* Kenarları hafif yuvarlaklaştır */
+  transition: background-color 0.2s; /* Arka plan rengi geçişi için animasyon */
+  margin-bottom: 24px;
+}
+
+.buy-button:hover {
+  background-color: #45a049; /* Üzerine gelindiğinde arka plan rengini koyulaştır */
+}
+
+.sell-button {
+  background-color: #ff0000; /* Yeşil arka plan */
+  border: none; /* Kenarlığı kaldır */
+  color: white; /* Yazı rengi beyaz */
+  padding: 10px 20px; /* İç boşluk */
+  text-align: center; /* Metni ortala */
+  text-decoration: none; /* Metin süslemesini kaldır */
+  display: inline-block; /* Butonu inline-block elemanı yap */
+  font-size: 16px; /* Yazı tipi boyutu */
+  margin: 4px 2px; /* Çevresindeki boşluk */
+  cursor: pointer; /* İmleç üzerine geldiğinde el simgesini göster */
+  border-radius: 4px; /* Kenarları hafif yuvarlaklaştır */
+  transition: background-color 0.2s; /* Arka plan rengi geçişi için animasyon */
+  margin-bottom: 24px;
+}
+
+.sell-button:hover {
+  background-color: #8f0505; /* Üzerine gelindiğinde arka plan rengini koyulaştır */
+}
+
+.delete-button {
+  background-color: transparent; /* Şeffaf arka plan */
+  border: none; /* Kenarlığı kaldır */
+  cursor: pointer; /* İmleç üzerine geldiğinde el simgesini göster */
+  padding: 5px; /* İç boşluk */
+  display: inline-flex; /* İçeriğini ortala ve inline özelliğini koru */
+  align-items: center; /* Dikey olarak ortala */
+  justify-content: center; /* Yatay olarak ortala */
+}
+
+.delete-button:focus {
+  outline: none; /* Fokusta kenarlık çıkmasını engelle */
+}
+
+.delete-icon {
+  color: black; /* Çarpı işaretinin rengi */
+  font-size: 24px; /* Çarpı işaretinin boyutu */
+  font-weight: bold; /* İkonun kalın olmasını sağla */
+}
+
+.graph {
+  margin: auto;
+  width: 90%;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Butonları yatay olarak ortalar */
+  padding: 10px; /* İsteğe bağlı dış boşluk */
+}
+
+.time-filter-button {
+  background-color: transparent; /* Arka planı transparan yap */
+  color: rgb(179, 177, 177);
+  border: none; /* Kenarlıkları kaldır */
+  margin: 0 5px; /* Butonlar arası boşluk */
+  padding: 5px 10px; /* İç boşluk */
+  cursor: pointer; /* İmleç buton üzerindeyken el şeklini alır */
+  font-weight: bold; /* Yazı tipini kalın yap */
+  font-size: 16px;
+}
+
+.time-filter-button:focus {
+  outline: none; /* Fokus halindeki kenarlığı kaldır */
+  color: black;
+  text-decoration: underline;
+}
+
+.time-filter-button:hover {
+  text-decoration: underline; /* Üzerine gelindiğinde altını çiz */
+}
+
+.graph-container {
+  display: flex;
+  justify-content: space-between; /* Grafikleri sayfanın iki yanına yerleştirir */
+  flex-wrap: nowrap; /* Grafiklerin alt alta düşmesini engeller */
+  margin: auto;
+  width: 90%;
+  margin-bottom: 2%;
+}
+
+.logout-button {
+  background-color: #ffffff; /* Red background */
+  color: #673ab7; /* White text */
+  border: none; /* No border */
+  border-radius: 12px; /* Rounded corners */
+  padding: 10px 20px; /* Top/bottom and left/right padding */
+  font-size: 16px; /* Size of the text */
+  font-weight: bold; /* Bold text */
+  text-transform: uppercase; /* UPPERCASE text */
+  cursor: pointer; /* Pointer cursor on hover */
+  display: inline-flex; /* Use flexbox for alignment */
+  align-items: center; /* Align items vertically */
+  justify-content: center; /* Center content horizontally */
+  gap: 10px; /* Space between icon and text */
+}
+
+.logout-button:focus {
+  outline: none; /* Remove outline on focus */
+}
+
+.logout-button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Smaller shadow for pressed effect */
+  transform: translateY(2px); /* Move button down to simulate press */
+}
+
+.add-tab-button {
+  position: absolute;
+  top: 48px;
+  right: 8px; /* düğme konumunu ayarlayın */
+  width: 48px; /* düğme genişliği */
+  height: 48px; /* düğme yüksekliği */
+  border: none;
+  color: #673ab7;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 24px;
+}
+.add-tab-button:focus {
+  outline: none; /* Remove outline on focus */
+}
+.add-tab-button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Smaller shadow for pressed effect */
+  transform: translateY(2px); /* Move button down to simulate press */
+}

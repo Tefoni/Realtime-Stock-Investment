@@ -57,6 +57,8 @@ def getTransactionHistory(transactionHistory):
     transaction_market_value = stock_response['lastPrice'] * transactionHistory.amount
     net_transaction_profit = (stock_response['lastPrice'] - transactionHistory.price) * transactionHistory.amount
     daily_transaction_profit = (stock_response['lastPrice'] - stock_response['regularMarketPreviousClose']) * transactionHistory.amount
+    dailyTransactionPercentageProfit = round((stock_response["lastPrice"] - stock_response["regularMarketPreviousClose"]) / stock_response["regularMarketPreviousClose"] * 100, 2)
+    netTransactionProfitPercentage = round((stock_response["lastPrice"] - transactionHistory.price) / transactionHistory.price * 100, 2)
     return{
         "symbol": stock.symbol,
         "openDate": transactionHistory.createDate.date(),
@@ -64,30 +66,28 @@ def getTransactionHistory(transactionHistory):
         "amount": transactionHistory.amount,
         "openPrice": transactionHistory.price,
         "lastPrice": round(stock_response['lastPrice'], 2),
-        "marketValue": round(transaction_market_value,2),
-        "dailyTransactionProfit": round(daily_transaction_profit, 2),
-        "dailyTransactionPercentageProfit": round((stock_response["lastPrice"] - stock_response["regularMarketPreviousClose"]) / stock_response["regularMarketPreviousClose"] * 100, 2),
-        "netTransactionProfit": round(net_transaction_profit, 2),
-        "netTransactionProfitPercentage": round((stock_response["lastPrice"] - transactionHistory.price) / transactionHistory.price * 100, 2),
+        "marketValue": round(transaction_market_value,2) if transactionHistory.transactionType == 1 else round(transaction_market_value*-1,2),
+        "dailyTransactionProfit": round(daily_transaction_profit, 2) if transactionHistory.transactionType == 1 else round(daily_transaction_profit*-1, 2),
+        "dailyTransactionPercentageProfit": dailyTransactionPercentageProfit if transactionHistory.transactionType == 1 else dailyTransactionPercentageProfit*-1,
+        "netTransactionProfit": round(net_transaction_profit, 2) if transactionHistory.transactionType == 1 else round(net_transaction_profit*-1, 2),
+        "netTransactionProfitPercentage": netTransactionProfitPercentage if transactionHistory.transactionType == 1 else netTransactionProfitPercentage*-1,
         "transactionId": transactionHistory.id
     }
 
 def profitHistoryof_stocks(stocks):
     response = []
-
     for stock in stocks:
         data = yf.download(stock.symbol, start=stock.createDate, end=datetime.now())
         stock_profits = []
         for row in data.iloc:
-            #stockProfit = (row.Close - stock.average_cost) * stock.amount
             average_cost,amount = getCurrentDateValuesForStock(row.name.date(),stock)
-            stockProfit = (row.Close - average_cost) * amount
-            # üstteki get fonksiyonun için transactionhistory createDate <= get... ise dahil et yaparsn, 2 fonksiyonu birleştirirsn
-            stock_profits.append({
-                    "date": str(row.name.date()),
-                    "profit": stockProfit
-                }
-            )
+            if amount != 0:
+                stockProfit = (row.Close - average_cost) * amount
+                stock_profits.append({
+                        "date": str(row.name.date()),
+                        "profit": stockProfit
+                    }
+                )
 
         response.append({
                 "symbol": stock.symbol,
@@ -114,6 +114,9 @@ def getCurrentDateValuesForStock(date,stock):
                 amount -= transaction.amount
                 total_MarketValue -= transaction.amount * transaction.stockCost
 
+    if amount <= 0:
+        return 0,0
+    
     average_cost = total_MarketValue/amount  
     return average_cost,amount
       

@@ -113,7 +113,7 @@ def sellStock():
         stock = getStockByPortfolioId(user_portfolio.id,str.upper(request_body["symbol"]))
         old_cost = stock.average_cost
         date_format = "%Y-%m-%dT21:00:00.000Z"
-        date = datetime.strptime(request_body["date"],date_format).date()
+        date = datetime.strptime(request_body["date"],date_format).date() + timedelta(days=1)
         if(date > datetime.now().date()):
             raise ValueError("Gelecekteki bir tarihe işlem giremezsiniz.")
 
@@ -169,7 +169,6 @@ def profitHistory():
         portfolio_stocks = getStocksByPortfolioId(request.get_json()['portfolioId'])
         start_dateofPortfolio = Stocks.query.filter(Stocks.portfolioId == user_portfolio.id).order_by(Stocks.createDate.asc()).first().createDate.date()
         end_dateofPortfolio = datetime.now().date()
-
         #with concurrent.futures.ThreadPoolExecutor() as executor:
         #    stock_infos = list(executor.map(profitHistoryof_stocks, portfolio_stocks))
         stock_infos = profitHistoryof_stocks(portfolio_stocks)
@@ -178,7 +177,7 @@ def profitHistory():
                         "endDate": end_dateofPortfolio,
                         "stocks": stock_infos,
                         "isSuccessful": True})
-    except Exception as e: 
+    except Exception as e:
         return jsonify({"message": str(e),
                        "isSuccessful": False})
     
@@ -244,9 +243,14 @@ def deleteTransaction():
         stock = Stocks.query.filter(Stocks.id == transaction.stockId).first()
         portfolio = getPortfolioById(stock.portfolioId)
         if transaction.transactionType == 1:    # BUY
+            if transaction.amount > stock.amount:
+                raise ValueError("Öncelikle satışı iptal etmelisiniz.")
             newStock_cost = ( (stock.amount*stock.average_cost)- transaction.amount*transaction.price )
             stock.amount -= transaction.amount
-            newStock_cost /= stock.amount
+            if stock.amount == 0:
+                newStock_cost = 0
+            else:
+                newStock_cost /= stock.amount
             stock.average_cost = newStock_cost
             stock.updateDate = datetime.now().date()
             #Update stock with new values
@@ -311,6 +315,23 @@ def portfolio():
     except Exception as e:
         return jsonify({"message": str(e),
                        "isSuccessful": False}) 
+
+@app.route('/addPortfolio',methods=['GET'])
+@jwt_required()
+def addPortfolio():
+    try:
+        user_email = get_jwt_identity()
+        user = User.query.filter(User.email == user_email).first()
+        userPortfolio = Portfolio(user = user,closedPositionValue = 0)
+        db.session.add(userPortfolio)
+        db.session.commit()
+
+        return jsonify({
+            "isSuccessful": True,
+        })
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccessful": False})  
     
 @app.route('/signUp',methods=['POST'])
 def signUp():
@@ -397,5 +418,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0')
 

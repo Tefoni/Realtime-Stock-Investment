@@ -1,11 +1,20 @@
-<h2>Login</h2>
-<form>
-  <label for="email">Email:</label>
-  <input type="email" id="email" [(ngModel)]="email" name="email" required>
+<div style="padding-top: 100px;"></div>
+<div class="login-form-container">
+  <h2>Login Form</h2>
+  <form>
+    <div class="input-group">
+      <label for="username">Email:</label>
+      <input type="email" id="email"  [(ngModel)]="email" placeholder="Enter your email" name="email" required>
+    </div>
 
-  <label for="password">Password:</label>
-  <input type="password" id="password" [(ngModel)]="password" name="password" required>
+    <div class="input-group">
+      <label for="password">Password:</label>
+      <input type="password" id="password" [(ngModel)]="password" placeholder="Enter your password" name="password" required>
+    </div>
 
-  <button type="button" (click)="login()">Login</button>
-  <button type="button" (click)="goToSignup()">Go to Signup</button>
-</form>
+    <button type="button" class="login-button" (click)="login()" >Login</button>
+    <div class="signup-text">
+      <button type="button" class="text-button" (click)="goToSignup()">Go to Sign Up</button>
+    </div>
+  </form>
+</div>

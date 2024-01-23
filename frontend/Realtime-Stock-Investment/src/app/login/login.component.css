@@ -2,3 +2,70 @@
   color: red;
   margin-top: 10px;
 }
+
+.login-form-container {
+  width: 300px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  background: #fff;
+}
+
+.login-form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-group input[type="email"],
+.input-group input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.login-button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.login-button:hover {
+  background: #0056b3;
+}
+
+/* Text Button for 'Go to Signup' */
+.signup-text {
+  text-align: center; /* Centers the text button */
+}
+
+.text-button {
+  background: none; /* Remove background */
+  color: #000000; /* Set text color */
+  padding: 0; /* Remove padding */
+  border: none; /* Remove border */
+  font-size: 16px; /* Set font size */
+  cursor: pointer; /* Set cursor to pointer */
+  outline: none; /* Remove focus outline */
+  padding-top: 16px;
+}
+
+.text-button:hover {
+  text-decoration: underline; /* Underline on hover */
+}

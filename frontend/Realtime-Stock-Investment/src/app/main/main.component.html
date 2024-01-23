@@ -1,10 +1,16 @@
-<div style="margin: 1%;">
-  <mat-tab-group (selectedIndexChange)="loadTableData($event)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<div class="data-item">
+  <button (click)="addTab()" class="add-tab-button">
+    +
+  </button>
+</div>
+<div style="margin: 2%;">
+  <mat-tab-group (selectedIndexChange)="loadTableData($event)" class="tab-group">
     <mat-tab *ngFor="let portfolioId of portfolioIds; let i = index">
       <ng-template mat-tab-label>
-        Tab {{ i+1 }}
+        Portföy {{ i+1 }}
       </ng-template>
-
+      
       <!-- Veri Gösterimleri -->
       <div class="data-display" style="margin: 2%;">
         <!-- Piyasa Değeri -->
@@ -30,6 +36,13 @@
           <div class="data-label">Kapalı K/Z:</div>
           <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.closedProfit)">{{this.portfolioValues.closedProfit}}</div>
         </div>
+        <div class="data-item">
+          <button mat-button (click)="logOut()" class="logout-button">
+            <i class="fas fa-sign-out-alt"></i>
+            Log Out
+          </button>
+        </div>
+        
       </div>
       <!-- Hisse Adı TextBox -->
       <form [formGroup]="form">
@@ -39,11 +52,11 @@
               <mat-option *ngFor = "let stockName of filterOptions | async" [value]="stockName">{{stockName}}</mat-option>
             </mat-autocomplete>
         </mat-form-field>
-        <div *ngIf="formControl.value">
+        <div class="stock-inputs" *ngIf="formControl.value">
           <!-- Date Input -->
           <mat-form-field>
             <mat-label>Tarih</mat-label>
-            <input matInput [matDatepicker]="picker" [disabled]="!formControl.value" formControlName="date" />
+            <input matInput [matDatepicker]="picker" [matDatepickerFilter]="dateFilter" [readonly]="true" [disabled]="!formControl.value" formControlName="date" />
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
@@ -61,9 +74,9 @@
           </mat-form-field>
       
           <!-- BUY SELL Buttons -->
-          <div>
-            <button mat-button color="primary" (click)="onBuyClick()" [disabled]="!formControl.value">BUY</button>
-            <button mat-button color="warn" (click)="onSellClick()" [disabled]="!formControl.value">SELL</button>
+          <div class="trade-buttons">
+            <button class="buy-button" mat-button color="primary" (click)="onBuyClick()" [disabled]="!formControl.value">BUY</button>
+            <button class="sell-button" mat-button color="warn" (click)="onSellClick()" [disabled]="!formControl.value">SELL</button>
           </div>
         </div>
       </form>
@@ -201,14 +214,52 @@
                 <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z % </th>
                 <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netTransactionProfitPercentage)"> {{element.netTransactionProfitPercentage}}% </td>
               </ng-container>
-            
+
+              <!-- Button Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="bold-text"></th>
+                <td mat-cell *matCellDef="let element">
+                  <button class="delete-button" (click)="deleteTransaction(element)">
+                    <span class="delete-icon">&times;</span>
+                  </button>
+                </td>
+              </ng-container>
+
               <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
             </table>         
           </mat-tab>
 
           <mat-tab [label] = "'İstatistikler'">
-            <h1>İstatistikler</h1>
+            <div  class="graph">
+              <h1 style="display: flex;justify-content: center;padding-top: 3%;">Gelir (K/Z)</h1>
+              <div style="display: flex;justify-content: center;" class="button-container">
+                <button class="time-filter-button" (click)="toggleViewMode('lastWeek')">1H</button>
+                <button class="time-filter-button" (click)="toggleViewMode('lastMonth')">1A</button>
+                <button class="time-filter-button" (click)="toggleViewMode('max')">Maks.</button>
+              </div>
+              <div>
+                <canvas baseChart
+                        [datasets]="currentGraphData"
+                        [labels]="currentGraphDates"
+                        [legend]="true"
+                        [type]="'line'"
+                        [options]="profitChartOptions">
+                </canvas>
+              </div>
+            </div>
+            <div style="margin: auto; width: 60%;">
+              <h1 style="display: flex;justify-content: center;padding-top: 3%;">Varlık Paylaşımı</h1>
+              <div>
+                <canvas baseChart
+                        [datasets]="[{ data: pieChartData }]"
+                        [labels]="pieChartLabels"
+                        [legend]="true"
+                        [type]="'pie'"
+                        [options]="pieChartOptions">
+                </canvas>
+              </div>
+            </div>
           </mat-tab>
 
         </mat-tab-group>
