@@ -1,10 +1,10 @@
-pip install flask
-pip install Flask-SQLAlchemy
-pip install yfinance
-pip install flask-login
-pip install Werkzeug
-pip install Flask-JWT-Extended
-pip install Flask-CORS
-pip install requests
-pip install beautifulsoup4
-pip install datetime
+flask
+Flask-SQLAlchemy
+yfinance
+flask-login
+Werkzeug
+Flask-JWT-Extended
+Flask-CORS
+requests
+beautifulsoup4
+datetime
