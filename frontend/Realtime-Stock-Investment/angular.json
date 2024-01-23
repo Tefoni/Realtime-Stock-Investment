@@ -39,6 +39,9 @@
               "src/styles.css"
             ],
             "scripts": [],
+            "allowedCommonJsDependencies": [
+              "chart.js"
+            ],
             "server": "src/main.server.ts",
             "prerender": true,
             "ssr": {
@@ -50,12 +53,12 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1.1mb",
-                  "maximumError": "1.1mb"
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "3kb",
+                  "maximumWarning": "2kb",
                   "maximumError": "4kb"
                 }
               ],

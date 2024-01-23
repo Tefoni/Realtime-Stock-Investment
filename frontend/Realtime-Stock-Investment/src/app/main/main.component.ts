@@ -1,11 +1,12 @@
 import { Component,Inject,OnInit,PLATFORM_ID} from '@angular/core';
 import { Router } from '@angular/router';
 import { StockInvestmentService } from '../services/stock-investment.service';
-import { Observable, interval, map, startWith, Subscription  } from 'rxjs';
+import { Observable, interval,Subscription  } from 'rxjs';
+import { startWith, map } from 'rxjs/operators';
 import { FormControl,FormGroup  } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { DatePipe } from '@angular/common';
-import { ChartDataset, ChartOptions, Color, TooltipLabelStyle } from 'chart.js';
+import { ChartOptions } from 'chart.js';
 
 
 @Component({
@@ -74,7 +75,7 @@ export class MainComponent {
       if(response.isSuccessful){
         this.stockNames = response.message;
         this.filterOptions = this.formControl.valueChanges.pipe(
-          startWith(''),map(value => this.filter(value || ''))
+          startWith(''),map((value: any) => this.filter(value || ''))
         )
       }
       else{
@@ -163,20 +164,7 @@ export class MainComponent {
           position: 'nearest',
           mode: 'index',
           intersect: false,
-          callbacks: {
-              labelColor: function(context) : TooltipLabelStyle {
-                let borderColor: Color = context.dataset.borderColor as Color || '#000';
-                let backgroundColor: Color = context.dataset.backgroundColor as Color || '#fff'; 
-                return {
-                  borderColor: borderColor,
-                  backgroundColor: backgroundColor,
-                };
-              },
-              label: function(tooltipItem){ 
-                var label = tooltipItem.dataset.label + ': '+ (tooltipItem.dataset?.data[tooltipItem.dataIndex] ?? ' ' );
-                return label;
-              }
-          }
+
         }
       },
       hover: {
