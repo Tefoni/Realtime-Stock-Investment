@@ -315,6 +315,23 @@ def portfolio():
     except Exception as e:
         return jsonify({"message": str(e),
                        "isSuccessful": False}) 
+
+@app.route('/addPortfolio',methods=['GET'])
+@jwt_required()
+def addPortfolio():
+    try:
+        user_email = get_jwt_identity()
+        user = User.query.filter(User.email == user_email).first()
+        userPortfolio = Portfolio(user = user,closedPositionValue = 0)
+        db.session.add(userPortfolio)
+        db.session.commit()
+
+        return jsonify({
+            "isSuccessful": True,
+        })
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccessful": False})  
     
 @app.route('/signUp',methods=['POST'])
 def signUp():
