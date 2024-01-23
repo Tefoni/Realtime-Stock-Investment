@@ -9,8 +9,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 import concurrent.futures
 from flask_cors import CORS
-import matplotlib.pyplot as plt
-import time
 import requests
 from bs4 import BeautifulSoup
 

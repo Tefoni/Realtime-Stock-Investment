@@ -1,11 +1,7 @@
-from functools import wraps
-from flask import Flask, jsonify,request
-from flask_sqlalchemy import SQLAlchemy
 import yfinance as yf
 from models import db, User, Portfolio, Stocks, TransactionHistory
 from app import app
 from datetime import datetime
-import json
 
 
 
