@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { StockInvestmentService } from '../services/stock-investment.service';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-signup',
@@ -17,8 +18,20 @@ export class SignupComponent {
   constructor(private router: Router, private service: StockInvestmentService) {}
 
   signup() {
+    if(this.name == ''){
+      this.service.showSnackBar("Lütfen isim giriniz.",'error');
+      return;
+    }
+    if(!( this.email.includes('@') && this.email.includes('.') && this.email.length >= 5) ){
+      this.service.showSnackBar("Geçerli bir email giriniz.",'error');
+      return;
+    }
     if(this.repeatPassword != this.password){
       this.service.showSnackBar("Şifreler uyuşmuyor",'error');
+      return;
+    }
+    if(this.password.length < 8){
+      this.service.showSnackBar("Şifre en az 8 karakterden oluşmalıdır.",'error');
       return;
     }
     this.service.signup(this.email, this.password,this.name).subscribe(response => {
@@ -31,6 +44,9 @@ export class SignupComponent {
       }
     });
 
+  }
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 
 }

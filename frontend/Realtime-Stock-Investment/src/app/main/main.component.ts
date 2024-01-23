@@ -1,7 +1,7 @@
 import { Component,Inject,OnInit,PLATFORM_ID} from '@angular/core';
 import { Router } from '@angular/router';
 import { StockInvestmentService } from '../services/stock-investment.service';
-import { Observable, interval, map, startWith } from 'rxjs';
+import { Observable, interval, map, startWith, Subscription  } from 'rxjs';
 import { FormControl,FormGroup  } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { DatePipe } from '@angular/common';
@@ -15,6 +15,7 @@ import { ChartDataset, ChartOptions, Color, TooltipLabelStyle } from 'chart.js';
 })
 
 export class MainComponent {
+  private updateSubscription!: Subscription;
   portfolioIds: number[] =[];
   currentPortfolioId: number = 0;
   currentSubTabIndex: number = 0;
@@ -63,8 +64,6 @@ export class MainComponent {
       if(response.isSuccessful){
         this.portfolioIds = response.message;
         this.currentPortfolioId = this.portfolioIds[0];
-        this.setProfitHistoryChart();
-        this.setStockDistribution();
       }
       else{
         this.service.showSnackBar(response.message,'error');
@@ -82,8 +81,7 @@ export class MainComponent {
         this.service.showSnackBar(response.message,'error');
       }
     });
-    /*
-    interval(1000).subscribe(() => {
+    this.updateSubscription = interval(1000).subscribe(() => {
       if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
           if(response.isSuccessful){
@@ -107,9 +105,15 @@ export class MainComponent {
         });
       }
     });
-    */
+    
   }
 
+  logOut() {
+    if (this.updateSubscription) {
+      this.updateSubscription.unsubscribe();
+    }
+    this.router.navigate(['/login']);
+  }
   private filter(value:string) : string[] {
     const searchValue = value.toLocaleLowerCase();
     return this.stockNames.filter(option => option.toLocaleLowerCase().includes(searchValue));
@@ -212,6 +216,8 @@ export class MainComponent {
   }
 
   setProfitHistoryChart(){
+    this.currentGraphData = [];
+    this.currentGraphDates = [];
     this.service.getProfitHistory(this.currentPortfolioId).subscribe(response => {
       if(response.isSuccessful){
         this.profitHistoryDates = [];
@@ -266,13 +272,11 @@ export class MainComponent {
   }
 
   setStockDistribution() {
-    this.pieChartData = [];
-    this.pieChartLabels = [];
-
     this.service.getStockDistribution(this.currentPortfolioId).subscribe(response => {
       if(response.isSuccessful){
+        this.pieChartData = [];
+        this.pieChartLabels = [];
         var stockDistribution = response.message;
-
         for (let index = 0; index < stockDistribution.length; index++) {
           this.pieChartLabels.push(stockDistribution[index].symbol);
           this.pieChartData.push(stockDistribution[index].distribution);       
@@ -373,4 +377,20 @@ export class MainComponent {
     today.setHours(0, 0, 0, 0); // Reset time part to the start of the day
     return d <= today; // Allow only days before today (inclusive)
   };
+  addTab() {
+   this.service.addPortfolio().subscribe(response => {
+    if(response.isSuccessful){
+      this.service.getUserPortfolioIds().subscribe(response => {
+       if(response.isSuccessful){
+         this.portfolioIds = response.message;
+       }
+       else{
+         this.service.showSnackBar(response.message,'error');
+       }
+     });
+    }
+   });
+   
+  
+  }
 }

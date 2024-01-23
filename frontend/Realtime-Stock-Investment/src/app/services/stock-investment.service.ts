@@ -57,6 +57,19 @@ export class StockInvestmentService implements HttpInterceptor  {
     return new Observable<any>;
   }
 
+  public addPortfolio(): Observable<any>{
+    if(this.localStorageAvailable){
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`,
+      });
+      const options = {headers};
+  
+      return this.http.get(`${this.apiUrl}/addPortfolio`,options);
+    }
+    return new Observable<any>;
+  }
+
   public getProfitHistory(portfolioId: number): Observable<any>{
     if(this.localStorageAvailable){
       const headers = new HttpHeaders({

@@ -141,4 +141,49 @@
   margin-bottom: 2%;
 }
 
+.logout-button {
+  background-color: #ffffff; /* Red background */
+  color: #673ab7; /* White text */
+  border: none; /* No border */
+  border-radius: 12px; /* Rounded corners */
+  padding: 10px 20px; /* Top/bottom and left/right padding */
+  font-size: 16px; /* Size of the text */
+  font-weight: bold; /* Bold text */
+  text-transform: uppercase; /* UPPERCASE text */
+  cursor: pointer; /* Pointer cursor on hover */
+  display: inline-flex; /* Use flexbox for alignment */
+  align-items: center; /* Align items vertically */
+  justify-content: center; /* Center content horizontally */
+  gap: 10px; /* Space between icon and text */
+}
 
+.logout-button:focus {
+  outline: none; /* Remove outline on focus */
+}
+
+.logout-button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Smaller shadow for pressed effect */
+  transform: translateY(2px); /* Move button down to simulate press */
+}
+
+.add-tab-button {
+  position: absolute;
+  top: 48px;
+  right: 8px; /* düğme konumunu ayarlayın */
+  width: 48px; /* düğme genişliği */
+  height: 48px; /* düğme yüksekliği */
+  border: none;
+  color: #673ab7;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 24px;
+}
+.add-tab-button:focus {
+  outline: none; /* Remove outline on focus */
+}
+.add-tab-button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Smaller shadow for pressed effect */
+  transform: translateY(2px); /* Move button down to simulate press */
+}

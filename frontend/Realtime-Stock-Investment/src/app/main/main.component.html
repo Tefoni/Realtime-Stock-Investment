@@ -1,10 +1,16 @@
-<div style="margin: 1%;">
-  <mat-tab-group (selectedIndexChange)="loadTableData($event)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<div class="data-item">
+  <button (click)="addTab()" class="add-tab-button">
+    +
+  </button>
+</div>
+<div style="margin: 2%;">
+  <mat-tab-group (selectedIndexChange)="loadTableData($event)" class="tab-group">
     <mat-tab *ngFor="let portfolioId of portfolioIds; let i = index">
       <ng-template mat-tab-label>
-        Tab {{ i+1 }}
+        Portföy {{ i+1 }}
       </ng-template>
-
+      
       <!-- Veri Gösterimleri -->
       <div class="data-display" style="margin: 2%;">
         <!-- Piyasa Değeri -->
@@ -30,6 +36,13 @@
           <div class="data-label">Kapalı K/Z:</div>
           <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.closedProfit)">{{this.portfolioValues.closedProfit}}</div>
         </div>
+        <div class="data-item">
+          <button mat-button (click)="logOut()" class="logout-button">
+            <i class="fas fa-sign-out-alt"></i>
+            Log Out
+          </button>
+        </div>
+        
       </div>
       <!-- Hisse Adı TextBox -->
       <form [formGroup]="form">
