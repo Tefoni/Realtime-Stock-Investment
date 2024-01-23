@@ -151,10 +151,9 @@ export class MainComponent {
       });
     }
 
-    if(this.currentSubTabIndex != 2){ // Set statistics at background
       this.setProfitHistoryChart();
       this.setStockDistribution();
-    }
+    
   }
 
   getProfitChartOptions(): ChartOptions {
@@ -216,10 +215,10 @@ export class MainComponent {
   }
 
   setProfitHistoryChart(){
-    this.currentGraphData = [];
-    this.currentGraphDates = [];
     this.service.getProfitHistory(this.currentPortfolioId).subscribe(response => {
       if(response.isSuccessful){
+        this.currentGraphData = [];
+        this.currentGraphDates = [];
         this.profitHistoryDates = [];
         this.profitHistoryData = [];
         this.lastMonthProfitHistoryData = [];
