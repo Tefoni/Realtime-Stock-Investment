@@ -6,7 +6,7 @@ import { startWith, map } from 'rxjs/operators';
 import { FormControl,FormGroup  } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { DatePipe } from '@angular/common';
-import { ChartOptions } from 'chart.js';
+import {ChartOptions, Color, TooltipLabelStyle} from 'chart.js';
 
 
 @Component({
@@ -164,7 +164,22 @@ export class MainComponent {
           position: 'nearest',
           mode: 'index',
           intersect: false,
-
+          
+          callbacks: {
+            labelColor: function(context) : TooltipLabelStyle {
+              let borderColor: Color = context.dataset.borderColor as Color || '#000';
+              let backgroundColor: Color = context.dataset.backgroundColor as Color || '#fff'; 
+              return {
+                borderColor: borderColor,
+                backgroundColor: backgroundColor,
+              };
+            },
+            label: function(tooltipItem){ 
+              var label = tooltipItem.dataset.label + ': '+ (tooltipItem.dataset?.data[tooltipItem.dataIndex] ?? ' ' );
+              return label;
+            }
+          }
+          
         }
       },
       hover: {

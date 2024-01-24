@@ -17,7 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
-import { ChartsModule} from 'ng2-charts';
+import { NgChartsModule} from 'ng2-charts';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -51,7 +51,7 @@ export const routes: Routes = [
     ReactiveFormsModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    ChartsModule,
+    NgChartsModule,
   ],
   providers: [
     provideClientHydration(),
