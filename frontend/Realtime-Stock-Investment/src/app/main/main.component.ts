@@ -65,6 +65,8 @@ export class MainComponent {
       if(response.isSuccessful){
         this.portfolioIds = response.message;
         this.currentPortfolioId = this.portfolioIds[0];
+        this.setProfitHistoryChart();
+        this.setStockDistribution();
       }
       else{
         this.service.showSnackBar(response.message,'error');
@@ -150,11 +152,7 @@ export class MainComponent {
           this.service.showSnackBar(response.message,'error');
         }
       });
-    }
-
-      this.setProfitHistoryChart();
-      this.setStockDistribution();
-    
+    }  
   }
 
   getProfitChartOptions(): ChartOptions {
@@ -330,6 +328,8 @@ export class MainComponent {
     this.service.buyStock(this.currentPortfolioId, this.stockName, this.form.value.amount, this.form.value.price, this.form.value.date).subscribe(response => {
       if(response.isSuccessful){
         this.service.showSnackBar(response.message,'success');
+        this.setProfitHistoryChart();
+        this.setStockDistribution();
       }
       else{
         this.service.showSnackBar(response.message,'error');
@@ -341,6 +341,8 @@ export class MainComponent {
     this.service.sellStock(this.currentPortfolioId, this.stockName, this.form.value.amount, this.form.value.price, this.form.value.date).subscribe(response => {
       if(response.isSuccessful){
         this.service.showSnackBar(response.message,'success');
+        this.setProfitHistoryChart();
+        this.setStockDistribution();
       }
       else{
         this.service.showSnackBar(response.message,'error');
@@ -364,6 +366,8 @@ export class MainComponent {
     this.service.deleteTransaction(transaction.transactionId).subscribe(response => {
       if(response.isSuccessful){
         this.service.showSnackBar(response.message,'success');
+        this.setProfitHistoryChart();
+        this.setStockDistribution();
       }
       else{
         this.service.showSnackBar(response.message,'error');
