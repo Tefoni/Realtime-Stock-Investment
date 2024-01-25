@@ -2,6 +2,7 @@ import yfinance as yf
 from models import db, User, Portfolio, Stocks, TransactionHistory
 from app import app
 from datetime import datetime
+from math import isnan
 
 
 
@@ -63,8 +64,8 @@ def getTransactionHistory(transactionHistory):
         "openPrice": transactionHistory.price,
         "lastPrice": round(stock_response['lastPrice'], 2),
         "marketValue": round(transaction_market_value,2) if transactionHistory.transactionType == 1 else round(transaction_market_value*-1,2),
-        "dailyTransactionProfit": round(daily_transaction_profit, 2) if transactionHistory.transactionType == 1 else round(daily_transaction_profit*-1, 2),
-        "dailyTransactionPercentageProfit": dailyTransactionPercentageProfit if transactionHistory.transactionType == 1 else dailyTransactionPercentageProfit*-1,
+        "dailyTransactionProfit": "-"if isnan(daily_transaction_profit) else ( round(daily_transaction_profit, 2) if transactionHistory.transactionType == 1 else round(daily_transaction_profit*-1, 2) ),
+        "dailyTransactionPercentageProfit": "-" if isnan(dailyTransactionPercentageProfit) else ( dailyTransactionPercentageProfit if transactionHistory.transactionType == 1 else dailyTransactionPercentageProfit*-1 ),
         "netTransactionProfit": round(net_transaction_profit, 2) if transactionHistory.transactionType == 1 else round(net_transaction_profit*-1, 2),
         "netTransactionProfitPercentage": netTransactionProfitPercentage if transactionHistory.transactionType == 1 else netTransactionProfitPercentage*-1,
         "transactionId": transactionHistory.id

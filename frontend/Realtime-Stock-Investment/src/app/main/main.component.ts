@@ -84,7 +84,7 @@ export class MainComponent {
         this.service.showSnackBar(response.message,'error');
       }
     });
-    this.updateSubscription = interval(1000).subscribe(() => {
+    this.updateSubscription = interval(2500).subscribe(() => {
       if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
           if(response.isSuccessful){
