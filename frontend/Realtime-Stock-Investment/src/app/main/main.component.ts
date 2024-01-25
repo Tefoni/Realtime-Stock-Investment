@@ -223,6 +223,9 @@ export class MainComponent {
         this.profitHistoryDates = [];
         this.profitHistoryData = [];
         this.lastMonthProfitHistoryData = [];
+        this.lastMonthProfitHistoryDates = [];
+        this.lastWeekProfitHistoryData = [];
+        this.lastWeekProfitHistoryDates = [];
         const maxLength = Math.max(...response.stocks.map((stock: { profits: string | any[]; }) => stock.profits.length));
         this.profitHistoryDates = response.stocks.find((stock: { profits: string | any[]; }) => stock.profits.length === maxLength).profits.map((profit: { date: string; }) => profit.date);
         for (let i = 0; i < response.stocks.length; i++) {
