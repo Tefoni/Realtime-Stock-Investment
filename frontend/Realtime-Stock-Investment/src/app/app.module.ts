@@ -21,11 +21,13 @@ import { NgChartsModule} from 'ng2-charts';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { HomeComponent } from './home/home.component';
 
 export const routes: Routes = [
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
   { path: 'main', component: MainComponent},
+  { path: 'home', component: HomeComponent},
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
 
@@ -35,6 +37,7 @@ export const routes: Routes = [
     SignupComponent,
     LoginComponent,
     MainComponent,
+    HomeComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Dashboard</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#watchlist">Watch List</a></li>
+                <li><a href="#portfolios">Portfolios</a></li>
+                <li><a href="#performance">Performance</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="index-table">
+          <div class="index-item" *ngFor="let item of indexItems">
+            <div class="index-title">{{ item.title }}</div>
+            <div class="index-value">{{ item.value }}&nbsp;
+              <span [ngClass]="{'positive': item.change > 0, 'negative': item.change < 0}">
+                %{{ item.change }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <section class="table-section">
+            <table>
+              <caption>TOP GAINERS</caption>
+              <thead>
+                  <tr>
+                      <th>Ticker</th>
+                      <th>Last</th>
+                      <th>Change</th>
+                      <th>Volume</th>
+                  </tr>
+              </thead>
+              <tbody>
+                <tr  *ngFor="let gainer of gainers">
+                    <td>{{ gainer.ticker }}</td>
+                    <td>{{ gainer.last }}</td>
+                    <td [ngClass]="{'positive': gainer.change > 0, 'negative': gainer.change < 0}">%{{ gainer.change }}</td>
+                    <td>{{ gainer.volume }}</td>
+                </tr>
+              </tbody>
+           </table>
+        <table class="table-losers">
+          <caption>TOP LOSERS</caption>
+          <thead>
+              <tr>
+                  <th>Ticker</th>
+                  <th>Last</th>
+                  <th>Change</th>
+                  <th>Volume</th>
+              </tr>
+          </thead>
+          <tbody>
+            <tr  *ngFor="let loser of losers">
+                <td>{{ loser.ticker }}</td>
+                <td>{{ loser.last }}</td>
+                <td [ngClass]="{'positive': loser.change > 0, 'negative': loser.change < 0}">%{{ loser.change }}</td>
+                <td>{{ loser.volume }}</td>
+            </tr>
+          </tbody>
+      </table>
+      <table class="sector-indices">
+        <caption>SECTOR INDICES</caption>
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Last</th>
+                <th>Change</th>
+            </tr>
+        </thead>
+        <tbody>
+          <tr  *ngFor="let indice of indices">
+              <td>{{ indice.ticker }}</td>
+              <td>{{ indice.last }}</td>
+              <td [ngClass]="{'positive': indice.change > 0, 'negative': indice.change < 0}">%{{ indice.change }}</td>
+          </tr>
+        </tbody>
+    </table>
+        </section>
+    </main>
+</body>
+</html>

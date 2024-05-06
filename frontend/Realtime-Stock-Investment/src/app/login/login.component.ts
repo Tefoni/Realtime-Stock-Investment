@@ -19,7 +19,7 @@ export class LoginComponent {
       if(response.isSuccessful){
         localStorage.setItem('token',response.token);
         this.service.setToken(response.token);
-        this.router.navigate(['/main']);
+        this.router.navigate(['/home']);
       }
       else{
         this.service.showSnackBar(response.message,'error');
