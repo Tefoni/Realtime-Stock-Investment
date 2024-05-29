@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance DashBoard</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a routerLink="/home">Home</a></li>
+                <li><a routerLink="/watchList">Watch List</a></li>
+                <li><a routerLink="/main">Portfolios</a></li>
+                <li><a href="/performance">Performance</a></li>
+                <li style="padding-left: 80%;"><a routerLink="/login">Sign Out</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="graph">
+      <div style="flex: 1; min-width: 800px; height: 400px;">
+        <h2 style="padding-top: 1%; text-align: center; color: #ffffff;">1 MONTH RELATIVE PERFORMANCE [PORTFOLIO]</h2>
+      </div>
+    </div>
+    <table class="performance-table">
+      <thead>
+          <tr>
+              <th>Ticker</th>
+              <th>Price</th>
+              <th>Perf Day</th>
+              <th>Perf Month</th>
+          </tr>
+      </thead>
+      <tbody>
+        <tr  *ngFor="let data of dataSourcex">
+            <td>{{ data.ticker }}</td>
+            <td>{{ data.price }}</td>
+            <td [ngClass]="{'positive': data.perfDay > 0, 'negative': data.perfDay < 0}">%{{ data.perfDay }}</td>
+            <td [ngClass]="{'positive': data.perfMonth > 0, 'negative': data.perfMonth < 0}">%{{ data.perfMonth }}</td>
+        </tr>
+      </tbody>
+    </table>
+</body>
+</html>

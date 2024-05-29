@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch List</title>
+</head>
+  <body>
+    <header>
+      <nav>
+          <ul>
+              <li><a routerLink="/home">Home</a></li>
+              <li><a routerLink="/watchList">Watch List</a></li>
+              <li><a routerLink="/main">Portfolios</a></li>
+              <li><a href="/performance">Performance</a></li>
+              <li style="padding-left: 80%;"><a routerLink="/login">Sign Out</a></li>
+          </ul>
+      </nav>
+    </header>
+    <div class="search-bar">
+      <mat-form-field appearance="fill">
+          <mat-label>Search Market</mat-label>
+          <input type="text" matInput [formControl]="searchControl" [matAutocomplete]="auto">
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+              <mat-option style="background-color: #22262F; color: #fff;" *ngFor="let option of filteredOptions" [value]="option">
+                  {{ option }}
+              </mat-option>
+          </mat-autocomplete>
+      </mat-form-field>
+    </div>
+    <table class="table-section">
+      <thead>
+          <tr>
+              <th>Markets</th>
+              <th>Change</th>
+              <th>Last</th>
+              <th>High</th>
+              <th>Low</th>
+              <th>Open</th>
+              <th>Volume</th>
+              <th>Time</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr *ngFor="let data of marketData; let i = index">
+              <td>{{ data.market }}</td>
+              <td [ngClass]="{'positive': data.change > 0, 'negative': data.change < 0}">{{ data.change | number:'1.2-2' }}%</td>
+              <td>{{ data.last | number:'1.2-2' }}</td>
+              <td>{{ data.high | number:'1.2-2' }}</td>
+              <td>{{ data.low | number:'1.2-2' }}</td>
+              <td>{{ data.open | number:'1.2-2' }}</td>
+              <td>{{ data.volume }}</td>
+              <td>{{ data.time }}</td>
+              <td><button class="delete-button" (click)="deleteRow(i)">
+                    <span class="delete-icon">&times;</span>
+                  </button>
+              </td>
+          </tr>
+      </tbody>
+  </table>
+  </body>
+</html>

@@ -22,12 +22,18 @@ import { NgChartsModule} from 'ng2-charts';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
+import { PortfolioComponent } from './portfolio/portfolio.component';
+import { WatchListComponent } from './watch-list/watch-list.component';
+import { PerformanceComponent } from './performance/performance.component';
 
 export const routes: Routes = [
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
   { path: 'main', component: MainComponent},
   { path: 'home', component: HomeComponent},
+  { path: 'watchList', component: WatchListComponent},
+  { path: 'portfolio', component: PortfolioComponent},
+  { path: 'performance', component: PerformanceComponent},
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
 
@@ -38,6 +44,9 @@ export const routes: Routes = [
     LoginComponent,
     MainComponent,
     HomeComponent,
+    PortfolioComponent,
+    WatchListComponent,
+    PerformanceComponent,
   ],
   imports: [
     BrowserModule,
