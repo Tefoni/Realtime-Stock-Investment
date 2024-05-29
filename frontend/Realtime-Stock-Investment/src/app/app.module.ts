@@ -18,6 +18,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { NgChartsModule} from 'ng2-charts';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -64,6 +65,7 @@ export const routes: Routes = [
     MatDatepickerModule,
     MatNativeDateModule,
     NgChartsModule,
+    NgxChartsModule,
   ],
   providers: [
     provideClientHydration(),

@@ -20,6 +20,14 @@
     <div class="graph">
       <div style="flex: 1; min-width: 800px; height: 400px;">
         <h2 style="padding-top: 1%; text-align: center; color: #ffffff;">1 MONTH RELATIVE PERFORMANCE [PORTFOLIO]</h2>
+        <ngx-charts-bar-vertical
+          [results]="datas"
+          [xAxis]="true"
+          [legend]="false"
+          [showXAxisLabel]="true"
+          [showDataLabel]="true"
+          style="fill: #ffffff;">
+        </ngx-charts-bar-vertical>
       </div>
     </div>
     <table class="performance-table">
