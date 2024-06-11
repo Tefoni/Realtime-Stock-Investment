@@ -17,5 +17,10 @@
           </ul>
       </nav>
     </header>
+    <select class="portfolio-dropdown" [(ngModel)] = "currentPortfolioId">
+      <option *ngFor = "let portfolioId of portfolioIds" value="{{portfolioId}}">Portfolio{{portfolioId}}</option>
+    </select>
+    <button class="dropdown-button" (click)="addTab()">+</button>
+    
   </body>
 </html>

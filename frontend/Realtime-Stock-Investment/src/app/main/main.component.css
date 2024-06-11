@@ -10,6 +10,7 @@
 
 .bold-text{
   font-weight: bolder;
+  color: white;
 }
 
 .data-display {
@@ -95,7 +96,7 @@
 }
 
 .delete-icon {
-  color: black; /* Çarpı işaretinin rengi */
+  color: white; /* Çarpı işaretinin rengi */
   font-size: 24px; /* Çarpı işaretinin boyutu */
   font-weight: bold; /* İkonun kalın olmasını sağla */
 }
@@ -217,4 +218,34 @@ header nav ul li a {
 header nav ul li a:hover {
   background-color: #ddd;
   color: black;
+}
+
+.portfolio-dropdown {
+  background-color: #22262F; /* Background color similar to your image */
+  border-color: #4C5263;
+  margin: 10px;
+  color: white;
+  padding: 10px; /* Add padding for better appearance */
+  padding-right: 150px;
+  border-radius: 10px; /* Rounded corners */
+  font-size: 16px; /* Font size */
+}
+
+/* Style for the button next to the dropdown */
+.dropdown-button {
+  background-color: #22262F; /* Background color for button */
+  border-color: #4C5263;
+  color: #FFFFFF; /* Text color */
+  margin-left: 6px;
+  padding: 10px; /* Padding */
+  font-size: 16px; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 5px; /* Rounded corners only on the right side */
+}
+
+/* Optional: Hover and focus states for accessibility */
+.portfolio-dropdown:hover, .portfolio-dropdown:focus,
+.dropdown-button:hover{
+  outline: none; /* Remove outline on focus */
+  background-color: #3E3E3E; /* Slightly different background on hover/focus */
 }

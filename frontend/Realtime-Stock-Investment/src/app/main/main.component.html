@@ -1,280 +1,273 @@
-<header>
-  <nav>
-      <ul>
-          <li><a routerLink="/home">Home</a></li>
-          <li><a routerLink="/watchList">Watch List</a></li>
-          <li><a routerLink="/main">Portfolios</a></li>
-          <li><a href="/performance">Performance</a></li>
-          <li style="padding-left: 80%;"><a routerLink="/login">Sign Out</a></li>
-      </ul>
-  </nav>
-</header>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<div class="data-item">
-<button (click)="addTab()" class="add-tab-button">
-+
-</button>
-</div>
-<div style="margin: 2%;">
-<mat-tab-group (selectedIndexChange)="loadTableData($event)" class="tab-group">
-<mat-tab *ngFor="let portfolioId of portfolioIds; let i = index">
-<ng-template mat-tab-label>
-  Portföy {{ i+1 }}
-</ng-template>
-
-<!-- Veri Gösterimleri -->
-<div class="data-display" style="margin: 2%;">
-  <!-- Piyasa Değeri -->
-  <div class="data-item">
-    <div class="data-label">Piyasa Değeri:</div>
-    <div class="data-value bold-text">{{this.portfolioValues.marketValue}}</div>
-  </div>
-  
-  <!-- Günlük K/Z -->
-  <div class="data-item">
-    <div class="data-label">Günlük K/Z:</div>
-    <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.dailyProfit)">{{this.portfolioValues.dailyProfit}}</div>
-  </div>
-  
-  <!-- Açık K/Z -->
-  <div class="data-item">
-    <div class="data-label">Açık K/Z:</div>
-    <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.openProfit)">{{this.portfolioValues.openProfit}}</div>
-  </div>
-  
-  <!-- Kapalı K/Z -->
-  <div class="data-item">
-    <div class="data-label">Kapalı K/Z:</div>
-    <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.closedProfit)">{{this.portfolioValues.closedProfit}}</div>
-  </div>
-  <div class="data-item">
-    <button mat-button (click)="logOut()" class="logout-button">
-      <i class="fas fa-sign-out-alt"></i>
-      Log Out
-    </button>
-  </div>
-  
-</div>
-<!-- Hisse Adı TextBox -->
-<form [formGroup]="form">
-  <mat-form-field>
-      <input matInput [matAutocomplete]="auto" [formControl]="formControl" placeholder="Pozisyon Ekle" (blur)="onBlur()"/>
-      <mat-autocomplete #auto (optionSelected) = "onStockSelected($event)">
-        <mat-option *ngFor = "let stockName of filterOptions | async" [value]="stockName">{{stockName}}</mat-option>
-      </mat-autocomplete>
-  </mat-form-field>
-  <div class="stock-inputs" *ngIf="formControl.value">
-    <!-- Date Input -->
-    <mat-form-field>
-      <mat-label>Tarih</mat-label>
-      <input matInput [matDatepicker]="picker" [matDatepickerFilter]="dateFilter" [readonly]="true" [disabled]="!formControl.value" formControlName="date" />
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-    </mat-form-field>
-
-    <!-- Miktar Input -->
-    <mat-form-field>
-      <mat-label>Miktar</mat-label>
-      <input matInput type="number" [disabled]="!formControl.value" formControlName="amount" />
-    </mat-form-field>
-
-    <!-- Fiyat Input -->
-    <mat-form-field>
-      <mat-label>Fiyat</mat-label>
-      <input matInput type="number" step="0.01" [disabled]="!formControl.value" formControlName="price" />
-    </mat-form-field>
-
-    <!-- BUY SELL Buttons -->
-    <div class="trade-buttons">
-      <button class="buy-button" mat-button color="primary" (click)="onBuyClick()" [disabled]="!formControl.value">BUY</button>
-      <button class="sell-button" mat-button color="warn" (click)="onSellClick()" [disabled]="!formControl.value">SELL</button>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Dashboard</title>
+  </head>
+  <body [ngStyle]="{'background-color': backgroundColor}">
+    <header>
+      <nav>
+          <ul>
+              <li><a routerLink="/home">Home</a></li>
+              <li><a routerLink="/watchList">Watch List</a></li>
+              <li><a routerLink="/main">Portfolios</a></li>
+              <li><a href="/performance">Performance</a></li>
+              <li style="padding-left: 80%;"><a  click="logOut()" routerLink="/login">Sign Out</a></li>
+          </ul>
+      </nav>
+    </header>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <select class="portfolio-dropdown" [(ngModel)] = "currentPortfolioId" (selectedIndexChange)="loadTableData($event)">
+      <option *ngFor = "let portfolioId of portfolioIds; let i = index" value="{{portfolioId}}">Portfolio{{i+1}}</option>
+    </select>
+    <button class="dropdown-button" (click)="addTab()">+</button>
+    
+    <!-- Veri Gösterimleri -->
+    <div class="data-display" style="margin: 1%;">
+      <!-- Piyasa Değeri -->
+      <div class="data-item">
+        <div class="data-label">Piyasa Değeri:</div>
+        <div class="data-value bold-text">{{this.portfolioValues.marketValue}}</div>
+      </div>
+      
+      <!-- Günlük K/Z -->
+      <div class="data-item">
+        <div class="data-label">Günlük K/Z:</div>
+        <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.dailyProfit)">{{this.portfolioValues.dailyProfit}}</div>
+      </div>
+      
+      <!-- Açık K/Z -->
+      <div class="data-item">
+        <div class="data-label">Açık K/Z:</div>
+        <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.openProfit)">{{this.portfolioValues.openProfit}}</div>
+      </div>
+      
+      <!-- Kapalı K/Z -->
+      <div class="data-item">
+        <div class="data-label">Kapalı K/Z:</div>
+        <div class="data-value" [ngClass]="changeRowColor(this.portfolioValues.closedProfit)">{{this.portfolioValues.closedProfit}}</div>
+      </div> 
     </div>
-  </div>
-</form>
-
-<div>
-  <mat-tab-group (selectedIndexChange)="onTabChange($event)" [(selectedIndex)]="currentSubTabIndex">
-    <mat-tab [label] = "'Varlıklar'">
-      <table mat-table [dataSource]="stocks" class="mat-elevation-z8">
-      
-        <!-- symbol Column -->
-        <ng-container matColumnDef="symbol">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Sembol </th>
-          <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
-        </ng-container>
-        
-        <!-- amount Column -->
-        <ng-container matColumnDef="amount">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Miktar </th>
-          <td mat-cell *matCellDef="let element"> {{element.amount}} </td>
-        </ng-container>
-
-        <!-- average_cost Column -->
-        <ng-container matColumnDef="average_cost">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Ortalama Fiyat </th>
-          <td mat-cell *matCellDef="let element"> {{element.average_cost}} </td>
-        </ng-container>
-
-        <!-- lastPrice Column -->
-        <ng-container matColumnDef="lastPrice">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Mevcut Fiyat </th>
-          <td mat-cell *matCellDef="let element"> {{element.lastPrice}} </td>
-        </ng-container>
-
-        <!-- marketValue Column -->
-        <ng-container matColumnDef="marketValue">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Piyasa Değeri </th>
-          <td mat-cell *matCellDef="let element"> {{element.marketValue}} </td>
-        </ng-container>
-
-        <!-- dailyStockProfit Column -->
-        <ng-container matColumnDef="dailyStockProfit">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyStockProfit)"> {{element.dailyStockProfit}} </td>
-        </ng-container>
-
-        <!-- dailyStockPercentageProfit Column -->
-        <ng-container matColumnDef="dailyStockPercentageProfit">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z % </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyStockPercentageProfit)"> {{element.dailyStockPercentageProfit}}% </td>
-        </ng-container>
-      
-        <!-- netStockProfit Column -->
-        <ng-container matColumnDef="netStockProfit">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netStockProfit)"> {{element.netStockProfit}} </td>
-        </ng-container>
-      
-        <!-- netStockProfitPercentage Column -->
-        <ng-container matColumnDef="netStockProfitPercentage">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z % </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netStockProfitPercentage)"> {{element.netStockProfitPercentage}}% </td>
-        </ng-container>
-      
-      
-        <tr mat-header-row *matHeaderRowDef="portfolioColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: portfolioColumns;"></tr>
-      </table>
-    </mat-tab>
-
-    <mat-tab [label] = "'İşlemler'">
-      <table mat-table [dataSource]="transactions" class="mat-elevation-z8">
-      
-        <!-- symbol Column -->
-        <ng-container matColumnDef="symbol">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Sembol </th>
-          <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
-        </ng-container>
-        
-        <!-- openDate Column -->
-        <ng-container matColumnDef="openDate">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Açılış Tarihi </th>
-          <td mat-cell *matCellDef="let element"> {{this.datePipe.transform(element.openDate, 'dd/MM/yyyy')}} </td>
-        </ng-container>
-
-        <!-- type Column -->
-        <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Çeşidi </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.type == 'BUY' ? 1 : -1)"> {{element.type}} </td>
-        </ng-container>
-
-        <!-- amount Column -->
-        <ng-container matColumnDef="amount">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Miktar </th>
-          <td mat-cell *matCellDef="let element"> {{element.amount}} </td>
-        </ng-container>
-
-        <!-- openPrice Column -->
-        <ng-container matColumnDef="openPrice">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Açılış Fiyatı </th>
-          <td mat-cell *matCellDef="let element"> {{element.openPrice}} </td>
-        </ng-container>
-
-        <!-- lastPrice Column -->
-        <ng-container matColumnDef="lastPrice">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Mevcut Fiyat </th>
-          <td mat-cell *matCellDef="let element"> {{element.lastPrice}} </td>
-        </ng-container>
-
-        <!-- marketValue Column -->
-        <ng-container matColumnDef="marketValue">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Piyasa Değeri </th>
-          <td mat-cell *matCellDef="let element"> {{element.marketValue}} </td>
-        </ng-container>
-      
-        <!-- dailyTransactionProfit Column -->
-        <ng-container matColumnDef="dailyTransactionProfit">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyTransactionProfit)"> {{element.dailyTransactionProfit}} </td>
-        </ng-container>
-      
-        <!-- dailyTransactionPercentageProfit Column -->
-        <ng-container matColumnDef="dailyTransactionPercentageProfit">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z % </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyTransactionPercentageProfit)"> {{element.dailyTransactionPercentageProfit}}% </td>
-        </ng-container>
-
-        <!-- netTransactionProfit Column -->
-        <ng-container matColumnDef="netTransactionProfit">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netTransactionProfit)"> {{element.netTransactionProfit}} </td>
-        </ng-container>
-
-        <!-- netTransactionProfitPercentage Column -->
-        <ng-container matColumnDef="netTransactionProfitPercentage">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z % </th>
-          <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netTransactionProfitPercentage)"> {{element.netTransactionProfitPercentage}}% </td>
-        </ng-container>
-
-        <!-- Button Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="bold-text"></th>
-          <td mat-cell *matCellDef="let element">
-            <button class="delete-button" (click)="deleteTransaction(element)">
-              <span class="delete-icon">&times;</span>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
-      </table>         
-    </mat-tab>
-
-    <mat-tab [label] = "'İstatistikler'">
-      <div  class="graph">
-        <h1 style="display: flex;justify-content: center;padding-top: 3%;">Gelir (K/Z)</h1>
-        <div style="display: flex;justify-content: center;" class="button-container">
-          <button class="time-filter-button" (click)="toggleViewMode('lastWeek')">1H</button>
-          <button class="time-filter-button" (click)="toggleViewMode('lastMonth')">1A</button>
-          <button class="time-filter-button" (click)="toggleViewMode('max')">Maks.</button>
-        </div>
-        <div>
-          <canvas baseChart
-                  [datasets]="currentGraphData"
-                  [labels]="currentGraphDates"
-                  [legend]="true"
-                  [type]="'line'"
-                  [options]="profitChartOptions">
-          </canvas>
+    <!-- Hisse Adı TextBox -->
+    <form [formGroup]="form" style="margin: 1%;">
+      <mat-form-field>
+          <input matInput [matAutocomplete]="auto" [formControl]="formControl" placeholder="Pozisyon Ekle" (blur)="onBlur()"/>
+          <mat-autocomplete #auto (optionSelected) = "onStockSelected($event)">
+            <mat-option *ngFor = "let stockName of filterOptions | async" [value]="stockName">{{stockName}}</mat-option>
+          </mat-autocomplete>
+      </mat-form-field>
+      <div class="stock-inputs" *ngIf="formControl.value">
+        <!-- Date Input -->
+        <mat-form-field>
+          <mat-label>Tarih</mat-label>
+          <input matInput [matDatepicker]="picker" [matDatepickerFilter]="dateFilter" [readonly]="true" [disabled]="!formControl.value" formControlName="date" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+    
+        <!-- Miktar Input -->
+        <mat-form-field>
+          <mat-label>Miktar</mat-label>
+          <input matInput type="number" [disabled]="!formControl.value" formControlName="amount" />
+        </mat-form-field>
+    
+        <!-- Fiyat Input -->
+        <mat-form-field>
+          <mat-label>Fiyat</mat-label>
+          <input matInput type="number" step="0.01" [disabled]="!formControl.value" formControlName="price" />
+        </mat-form-field>
+    
+        <!-- BUY SELL Buttons -->
+        <div class="trade-buttons">
+          <button class="buy-button" mat-button color="primary" (click)="onBuyClick()" [disabled]="!formControl.value">BUY</button>
+          <button class="sell-button" mat-button color="warn" (click)="onSellClick()" [disabled]="!formControl.value">SELL</button>
         </div>
       </div>
-      <div style="margin: auto; width: 60%;">
-        <h1 style="display: flex;justify-content: center;padding-top: 3%;">Varlık Paylaşımı</h1>
-        <div>
-          <canvas baseChart
-                  [datasets]="[{ data: pieChartData }]"
-                  [labels]="pieChartLabels"
-                  [legend]="true"
-                  [type]="'pie'"
-                  [options]="pieChartOptions">
-          </canvas>
-        </div>
-      </div>
-    </mat-tab>
-
-  </mat-tab-group>
-</div>
-</mat-tab>
-</mat-tab-group>
-</div>
+    </form>
+    
+    <div style="margin: 1%;">
+      <mat-tab-group (selectedIndexChange)="onTabChange($event)" [(selectedIndex)]="currentSubTabIndex">
+        <mat-tab [label] = "'Varlıklar'">
+          <table mat-table [dataSource]="stocks" class="mat-elevation-z8" style="background-color: #22262F;">
+          
+            <!-- symbol Column -->
+            <ng-container matColumnDef="symbol">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Sembol </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.symbol}} </td>
+            </ng-container>
+            
+            <!-- amount Column -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Miktar </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.amount}} </td>
+            </ng-container>
+    
+            <!-- average_cost Column -->
+            <ng-container matColumnDef="average_cost">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Ortalama Fiyat </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.average_cost}} </td>
+            </ng-container>
+    
+            <!-- lastPrice Column -->
+            <ng-container matColumnDef="lastPrice">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Mevcut Fiyat </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.lastPrice}} </td>
+            </ng-container>
+    
+            <!-- marketValue Column -->
+            <ng-container matColumnDef="marketValue">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Piyasa Değeri </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.marketValue}} </td>
+            </ng-container>
+    
+            <!-- dailyStockProfit Column -->
+            <ng-container matColumnDef="dailyStockProfit">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyStockProfit)"> {{element.dailyStockProfit}} </td>
+            </ng-container>
+    
+            <!-- dailyStockPercentageProfit Column -->
+            <ng-container matColumnDef="dailyStockPercentageProfit">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z % </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyStockPercentageProfit)"> {{element.dailyStockPercentageProfit}}% </td>
+            </ng-container>
+          
+            <!-- netStockProfit Column -->
+            <ng-container matColumnDef="netStockProfit">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netStockProfit)"> {{element.netStockProfit}} </td>
+            </ng-container>
+          
+            <!-- netStockProfitPercentage Column -->
+            <ng-container matColumnDef="netStockProfitPercentage">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z % </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netStockProfitPercentage)"> {{element.netStockProfitPercentage}}% </td>
+            </ng-container>
+          
+          
+            <tr mat-header-row *matHeaderRowDef="portfolioColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: portfolioColumns;"></tr>
+          </table>
+        </mat-tab>
+    
+        <mat-tab [label] = "'İşlemler'">
+          <table mat-table [dataSource]="transactions" class="mat-elevation-z8" style="background-color: #22262F;">
+          
+            <!-- symbol Column -->
+            <ng-container matColumnDef="symbol">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Sembol </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.symbol}} </td>
+            </ng-container>
+            
+            <!-- openDate Column -->
+            <ng-container matColumnDef="openDate">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Açılış Tarihi </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{this.datePipe.transform(element.openDate, 'dd/MM/yyyy')}} </td>
+            </ng-container>
+    
+            <!-- type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Çeşidi </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.type == 'BUY' ? 1 : -1)"> {{element.type}} </td>
+            </ng-container>
+    
+            <!-- amount Column -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Miktar </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.amount}} </td>
+            </ng-container>
+    
+            <!-- openPrice Column -->
+            <ng-container matColumnDef="openPrice">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Açılış Fiyatı </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.openPrice}} </td>
+            </ng-container>
+    
+            <!-- lastPrice Column -->
+            <ng-container matColumnDef="lastPrice">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Mevcut Fiyat </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.lastPrice}} </td>
+            </ng-container>
+    
+            <!-- marketValue Column -->
+            <ng-container matColumnDef="marketValue">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Piyasa Değeri </th>
+              <td mat-cell *matCellDef="let element" style="color: white;"> {{element.marketValue}} </td>
+            </ng-container>
+          
+            <!-- dailyTransactionProfit Column -->
+            <ng-container matColumnDef="dailyTransactionProfit">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyTransactionProfit)"> {{element.dailyTransactionProfit}} </td>
+            </ng-container>
+          
+            <!-- dailyTransactionPercentageProfit Column -->
+            <ng-container matColumnDef="dailyTransactionPercentageProfit">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Günlük K/Z % </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.dailyTransactionPercentageProfit)"> {{element.dailyTransactionPercentageProfit}}% </td>
+            </ng-container>
+    
+            <!-- netTransactionProfit Column -->
+            <ng-container matColumnDef="netTransactionProfit">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netTransactionProfit)"> {{element.netTransactionProfit}} </td>
+            </ng-container>
+    
+            <!-- netTransactionProfitPercentage Column -->
+            <ng-container matColumnDef="netTransactionProfitPercentage">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"> Net K/Z % </th>
+              <td mat-cell *matCellDef="let element" [ngClass]="changeRowColor(element.netTransactionProfitPercentage)"> {{element.netTransactionProfitPercentage}}% </td>
+            </ng-container>
+    
+            <!-- Button Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="bold-text"></th>
+              <td mat-cell *matCellDef="let element">
+                <button class="delete-button" (click)="deleteTransaction(element)">
+                  <span class="delete-icon">&times;</span>
+                </button>
+              </td>
+            </ng-container>
+    
+            <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
+          </table>         
+        </mat-tab>
+    
+        <mat-tab [label] = "'İstatistikler'" style="background-color: #22262F;">
+          <div  class="graph" style="background-color: #22262F;">
+            <h1 style="display: flex;justify-content: center;padding-top: 3%;">Gelir (K/Z)</h1>
+            <div style="display: flex;justify-content: center;" class="button-container">
+              <button class="time-filter-button" (click)="toggleViewMode('lastWeek')">1H</button>
+              <button class="time-filter-button" (click)="toggleViewMode('lastMonth')">1A</button>
+              <button class="time-filter-button" (click)="toggleViewMode('max')">Maks.</button>
+            </div>
+            <div>
+              <canvas baseChart
+                      [datasets]="currentGraphData"
+                      [labels]="currentGraphDates"
+                      [legend]="true"
+                      [type]="'line'"
+                      [options]="profitChartOptions">
+              </canvas>
+            </div>
+          </div>
+          <div style="margin: auto; width: 60%; background-color: #22262F;">
+            <h1 style="display: flex;justify-content: center;padding-top: 3%;">Varlık Paylaşımı</h1>
+            <div>
+              <canvas baseChart
+                      [datasets]="[{ data: pieChartData }]"
+                      [labels]="pieChartLabels"
+                      [legend]="true"
+                      [type]="'pie'"
+                      [options]="pieChartOptions">
+              </canvas>
+            </div>
+          </div>
+        </mat-tab>
+    
+      </mat-tab-group>
+    </div>
+  </body>
+</html>
