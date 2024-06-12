@@ -24,19 +24,19 @@ export class PerformanceComponent {
 
   constructor() {
     this.dataSourcex = [
-      { ticker: 'USD', price: 190.93, perfDay: 0.19, perfMonth: 1.32 },
-      { ticker: 'EUR', price: 151.84, perfDay: 0.19, perfMonth: 0.37 },
-      { ticker: 'PORTFOLIO', price: 151.84, perfDay: 0.19, perfMonth: 0 },
-      { ticker: 'INTEREST', price: 190.93, perfDay: 0.19, perfMonth: -0.99 },
-      { ticker: 'GOLD', price: 151.84, perfDay: 0.19, perfMonth: -1.09 },
+      { ticker: 'USD', price: 1715.2, perfDay: 0.09, perfMonth: 2.94 },
+      { ticker: 'EUR', price: 1643.30, perfDay: -0.33, perfMonth: -1.4 },
+      { ticker: 'PORTFOLIO', price: 1666.65, perfDay: -1.95, perfMonth: 0 },
+      { ticker: 'INTEREST', price: 1740.7, perfDay: 0.125, perfMonth: 3.75 },
+      { ticker: 'GOLD', price: 1682.4, perfDay: 0.11, perfMonth: 1.09 },
       // Add more data as needed
     ];
     this.datas = [
-      { "name": "USD", "value": 1.32 },
-      { "name": "EUR", "value": 0.37 },
+      { "name": "USD", "value": 2.94 },
+      { "name": "EUR", "value": -1.4 },
       { "name": "PORTFOLIO", "value": 0.00 },
-      { "name": "INTEREST", "value": -0.99 },
-      { "name": "GOLD", "value": -1.09 },
+      { "name": "INTEREST", "value": 3.75},
+      { "name": "GOLD", "value": 1.09 },
     ];
   }
 

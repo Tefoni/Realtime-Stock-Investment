@@ -1,4 +1,5 @@
 from flask import Flask, jsonify,request
+import json
 from flask_sqlalchemy import SQLAlchemy
 import yfinance as yf
 from functions import *
@@ -26,21 +27,58 @@ jwt = JWTManager(app)
 
 db.init_app(app)
 
+@app.route('/getMarketStocks',methods=['POST'])
+@jwt_required()
+def getMarketStocks():
+    try:
+        stockNames = request.get_json()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+            watchListOutput = list(executor.map(getWatchListStock, stockNames))
+
+        return jsonify({"message": watchListOutput,
+                        "isSuccessful": True})
+    except Exception as e:
+        return jsonify({"message": str(e),
+                        "isSuccessful": False})
+
+
+@app.route('/getAllBIST',methods=['GET'])
+@jwt_required()
+def getAllBIST():
+    try:
+        indexItems = getIndexItems()
+        sectorIndices = getSectorIndices()
+
+        stocks = stockNames()
+        stocks.remove("ALTIN.IS") # Hisse statüsünde output gelmiyor
+        stocksOutput = []
+
+        # İş parçacıklarıyla hisse senedi bilgilerini al
+        with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+            stocksOutput = list(executor.map(getStockValue, stocks))
+
+        stocksOutput = [stock for stock in stocksOutput if -10 <= stock['change'] <= 10]
+        # `change` değerine göre sıralama
+        stocksOutput_sorted = sorted(stocksOutput, key=lambda x: x['change'])
+
+        output = {
+            "topGainers": stocksOutput_sorted[-20:][::-1],
+            "topLosers": stocksOutput_sorted[:20],
+            "indices": sectorIndices,
+            "indexItems": indexItems
+        }
+
+        return jsonify({"message": output,
+                        "isSuccessful": True})
+    except Exception as e:
+        return jsonify({"message": str(e),
+                        "isSuccessful": False})
+
 @app.route('/stockSymbols',methods=['GET'])
 @jwt_required()
 def stockSymbols():
     try:
-        url = 'https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/default.aspx'
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        rows = soup.find('table',{"data-csvname": "tumhisse"}).find('tbody').find_all('a')
-
-        names =[stock.text for stock in rows]
-
-        cleaned_names = [name.strip().replace("\r\n","") for name in names]
-        cleaned_names = [name for name in cleaned_names if name.isalpha()]
-        cleaned_names_with_extension = [name + ".IS" for name in cleaned_names]
-        return jsonify({"message": cleaned_names_with_extension,
+        return jsonify({"message": stockNames(),
                         "isSuccessful": True})
     except Exception as e: 
         return jsonify({"message": str(e),

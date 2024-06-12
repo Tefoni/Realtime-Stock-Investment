@@ -84,7 +84,7 @@ export class MainComponent {
         this.service.showSnackBar(response.message,'error');
       }
     });
-    this.updateSubscription = interval(2500).subscribe(() => {
+    this.updateSubscription = interval(5000).subscribe(() => {
       if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
           if(response.isSuccessful){
@@ -111,6 +111,12 @@ export class MainComponent {
     
   }
 
+  ngOnDestroy(){
+    if (this.updateSubscription) {
+      this.updateSubscription.unsubscribe();
+    }
+  }
+
   logOut() {
     if (this.updateSubscription) {
       this.updateSubscription.unsubscribe();
@@ -133,6 +139,19 @@ export class MainComponent {
       if(response.isSuccessful){
         this.stocks = response.stocks;
         this.portfolioValues = response;
+
+        if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
+          this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
+            if(response.isSuccessful){
+              this.stocks = response.stocks;
+              this.portfolioValues = response;
+            }
+            else{
+              this.service.showSnackBar(response.message,'error');
+            }
+          });
+        }
+        
       }
       else{
         this.service.showSnackBar(response.message,'error');

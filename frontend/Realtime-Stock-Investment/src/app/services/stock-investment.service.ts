@@ -14,7 +14,7 @@ export class StockInvestmentService implements HttpInterceptor  {
   private apiUrl = 'http://127.0.0.1:5000';
   private token = '';
   localStorageAvailable = false;
-
+  
   constructor(private http: HttpClient, private snackBar: MatSnackBar, @Inject(PLATFORM_ID) private platformId: Object, private router: Router) {
     // Check if running in a browser environment before using localStorage
     if (isPlatformBrowser(this.platformId)) {
@@ -177,6 +177,30 @@ export class StockInvestmentService implements HttpInterceptor  {
       });
       const options = {headers};  
       return this.http.get(`${this.apiUrl}/stockSymbols`,options);
+    }
+    return new Observable<any>;    
+  }
+
+  public getAllBIST(): Observable<any>{
+    if(this.localStorageAvailable){
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`,
+      });
+      const options = {headers};  
+      return this.http.get(`${this.apiUrl}/getAllBIST`,options);
+    }
+    return new Observable<any>;    
+  }
+
+  public getMarketStocks(stockNames: string[]): Observable<any>{
+    if(this.localStorageAvailable){
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`,
+      });
+      const options = {headers};  
+      return this.http.post(`${this.apiUrl}/getMarketStocks`,stockNames,options);
     }
     return new Observable<any>;    
   }

@@ -78,8 +78,8 @@
         </thead>
         <tbody>
           <tr  *ngFor="let indice of indices">
-              <td>{{ indice.ticker }}</td>
-              <td>{{ indice.last }}</td>
+              <td>{{ indice.title }}</td>
+              <td>{{ indice.value }}</td>
               <td [ngClass]="{'positive': indice.change > 0, 'negative': indice.change < 0}">%{{ indice.change }}</td>
           </tr>
         </tbody>

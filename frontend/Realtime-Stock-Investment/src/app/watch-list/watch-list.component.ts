@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subscription, interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { StockInvestmentService } from '../services/stock-investment.service';
 
 @Component({
   selector: 'app-watch-list',
@@ -10,34 +10,65 @@ import { map, startWith } from 'rxjs/operators';
   styleUrl: './watch-list.component.css'
 })
 export class WatchListComponent {
+  private updateSubscription!: Subscription;
   marketData = [
-    { market: 'GARAN', change: 0.15, last: 302.75, high: 311.50, low: 302.50, open: 300.0, volume: '432.5M', time: '17:45:05' },
-    { market: 'AKBNK', change: -0.15, last: 302.60, high: 311.40, low: 302.30, open: 299.8, volume: '430.0M', time: '17:45:05' },
-    { market: 'ISCTR', change: 0.30, last: 303.00, high: 312.00, low: 303.00, open: 300.5, volume: '435.0M', time: '17:45:05' },
-    { market: 'YKBNK', change: -0.20, last: 302.55, high: 311.25, low: 302.00, open: 299.9, volume: '431.5M', time: '17:45:05' },
-    { market: 'VAKBN', change: 0.10, last: 302.80, high: 311.60, low: 302.50, open: 300.2, volume: '432.8M', time: '17:45:05' },
-    { market: 'HALKB', change: -0.25, last: 302.50, high: 311.20, low: 302.10, open: 299.7, volume: '430.2M', time: '17:45:05' },
-    { market: 'TUPRS', change: 0.05, last: 302.70, high: 311.40, low: 302.40, open: 300.1, volume: '432.3M', time: '17:45:05' },
-    { market: 'EREGL', change: -0.10, last: 302.65, high: 311.35, low: 302.25, open: 299.5, volume: '431.0M', time: '17:45:05' },
-    { market: 'PETKM', change: 0.25, last: 302.90, high: 311.70, low: 302.60, open: 300.3, volume: '433.0M', time: '17:45:05' },
-    { market: 'SAHOL', change: -0.05, last: 302.75, high: 311.50, low: 302.50, open: 299.9, volume: '432.5M', time: '17:45:05' }
+    { market: 'GARAN', change: 3.91, last: 102.2, high: 103.40, low: 98.2, open: 98.45, volume: '1316220535', time: '17:45:05' },
+    { market: 'AKBNK', change: 2.78, last: 61.15, high: 61.60, low: 59.2, open: 59.45, volume: '3852291832', time: '17:45:05' },
+    { market: 'TUPRS', change: -0.49, last: 161.60, high: 163.00, low: 159.70, open: 162.30, volume: '3971625305', time: '17:45:05' },
+    { market: 'SAHOL', change: 1.45, last: 90.95, high: 91.00, low: 89.45, open: 89.65, volume: '1683140743', time: '17:45:05' },
   ];
+  marketNames: string[] = [];
 
   searchControl = new FormControl();
   filteredOptions: string[] = [];
   allOptions: string[] = ['GARAN', 'AKBNK', 'ISCTR', 'YKBNK', 'VAKBN', 'HALKB', 'TUPRS', 'EREGL', 'PETKM', 'SAHOL'];
 
-  constructor(private http: HttpClient) { }
+  constructor(private service: StockInvestmentService) { }
 
-  ngOnInit(): void {
-    // Fetch options from backend
-    
-    this.filteredOptions = this.allOptions;
 
+  ngOnInit(){
+    this.service.getStockSymbols().subscribe(response => {
+      if(response.isSuccessful){
+        this.allOptions = response.message;
+        this.allOptions = response.message.map((option: string) => option.replace('.IS', ''));
+        this.filteredOptions = this.allOptions;
+      }
+      else{
+        this.service.showSnackBar(response.message,'error');
+      }
+    });
     this.searchControl.valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value))
     ).subscribe(filtered => this.filteredOptions = filtered);
+
+
+    this.service.getMarketStocks(this.marketNames).subscribe(response => {
+      if(response.isSuccessful){
+        this.marketData = response.message;
+      }
+      else{
+        this.service.showSnackBar(response.message,'error');
+      }
+    });
+
+    this.updateSubscription = interval(5000).subscribe(() => {
+      this.service.getMarketStocks(this.marketNames).subscribe(response => {
+        if(response.isSuccessful){
+          this.marketData = response.message;
+        }
+        else{
+          this.service.showSnackBar(response.message,'error');
+        }
+      });
+    });
+
+  }
+
+  ngOnDestroy(){
+    if (this.updateSubscription) {
+      this.updateSubscription.unsubscribe();
+    }
   }
 
   private _filter(value: string): string[] {
@@ -47,24 +78,27 @@ export class WatchListComponent {
 
   onOptionSelected(event: any): void {
     const selectedMarket = event.option.value;
-    this.addRow(selectedMarket);
-  }
+    this.marketNames.push(selectedMarket + ".IS");
 
-  addRow(market: string): void {
-    // Add new market row with default values
-    this.marketData.push({
-      market: market,
-      change: 0.00,  // Default value
-      last: 0.00,    // Default value
-      high: 0.00,    // Default value
-      low: 0.00,     // Default value
-      open: 0.00,    // Default value
-      volume: '0.0M', // Default value
-      time: new Date().toLocaleTimeString() // Default to current time
+    this.service.getMarketStocks(this.marketNames).subscribe(response => {
+      if(response.isSuccessful){
+        this.marketData = response.message;
+      }
+      else{
+        this.service.showSnackBar(response.message,'error');
+      }
     });
   }
 
   deleteRow(index: number): void {
-    this.marketData.splice(index, 1);
+    this.marketNames.splice(index,1);
+    this.service.getMarketStocks(this.marketNames).subscribe(response => {
+      if(response.isSuccessful){
+        this.marketData = response.message;
+      }
+      else{
+        this.service.showSnackBar(response.message,'error');
+      }
+    });
   }
 }
