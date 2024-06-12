@@ -13,6 +13,7 @@ class User(db.Model):
     name = db.Column(db.String(40))
     createDate = db.Column(db.DateTime(timezone = True), default= datetime.now())
     portfolios = db.relationship('Portfolio', backref='user', lazy=True)
+    watchListStocks = db.relationship('WatchListStocks', backref='user', lazy = True)
     def __repr__(self):
         return f'<User: Id({self.id}) Email({self.email}) Password({self.password}) Name({self.name}) CreateDate({self.createDate})>\n'    
 
@@ -62,3 +63,9 @@ class TransactionHistory(db.Model):
     def __repr__(self):
         return f'<Transaction: Id({self.id}) StockId({self.stockId}) Amount({self.amount}) Price({self.price}) PortfolioId({self.portfolioId}) CreateDate({self.createDate}) TransactionType({self.transactionType})>\n'
     
+class WatchListStocks(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    stockName = db.Column(db.String(100), nullable = False)
+    def __repr__(self):
+        return f'<WatchListStock: Id({self.id}) UserId({self.userId}) StockName({self.stockName})>\n'

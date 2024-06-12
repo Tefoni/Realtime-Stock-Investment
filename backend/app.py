@@ -3,7 +3,7 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 import yfinance as yf
 from functions import *
-from models import db, User, Portfolio, Stocks, TransactionHistory
+from models import db, User, Portfolio, Stocks, TransactionHistory, WatchListStocks
 from datetime import datetime,timedelta
 from flask_login import *
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -367,7 +367,62 @@ def addPortfolio():
         })
     except Exception as e: 
         return jsonify({"message": str(e),
-                       "isSuccessful": False})  
+                       "isSuccessful": False}) 
+
+@app.route('/getWatchList',methods=['GET'])
+@jwt_required()
+def getWatchList():
+    try:
+        user_email = get_jwt_identity()
+        user = User.query.filter(User.email == user_email).first()
+        watchListStocks = WatchListStocks.query.filter(WatchListStocks.userId == user.id).all()
+        stock_names = [stock.stockName for stock in watchListStocks]
+        
+        print(stock_names)
+        return jsonify({
+            "message": stock_names,
+            "isSuccessful": True,
+        })
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccessful": False}) 
+
+@app.route('/addWatchListStock',methods=['POST'])
+@jwt_required()
+def addWatchListStock():
+    try:
+        stockName = request.get_json()["stockName"]
+        user_email = get_jwt_identity()
+        user = User.query.filter(User.email == user_email).first()
+        watchListStock = WatchListStocks(user = user, stockName = stockName)
+        db.session.add(watchListStock)
+        db.session.commit()
+
+        return jsonify({
+            "isSuccessful": True,
+        })
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccessful": False}) 
+    
+@app.route('/removeWatchListStock',methods=['POST'])
+@jwt_required()
+def removeWatchListStock():
+    try:
+        stockName = request.get_json()["stockName"]
+        user_email = get_jwt_identity()
+        user = User.query.filter(User.email == user_email).first()
+        watchListStock = WatchListStocks.query.filter(WatchListStocks.userId == user.id,WatchListStocks.stockName == stockName).first()
+        db.session.delete(watchListStock)
+        db.session.commit()
+
+        return jsonify({
+            "isSuccessful": True,
+        })
+    except Exception as e: 
+        return jsonify({"message": str(e),
+                       "isSuccessful": False}) 
+ 
     
 @app.route('/signUp',methods=['POST'])
 def signUp():

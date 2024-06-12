@@ -11,12 +11,7 @@ import { StockInvestmentService } from '../services/stock-investment.service';
 })
 export class WatchListComponent {
   private updateSubscription!: Subscription;
-  marketData = [
-    { market: 'GARAN', change: 3.91, last: 102.2, high: 103.40, low: 98.2, open: 98.45, volume: '1316220535', time: '17:45:05' },
-    { market: 'AKBNK', change: 2.78, last: 61.15, high: 61.60, low: 59.2, open: 59.45, volume: '3852291832', time: '17:45:05' },
-    { market: 'TUPRS', change: -0.49, last: 161.60, high: 163.00, low: 159.70, open: 162.30, volume: '3971625305', time: '17:45:05' },
-    { market: 'SAHOL', change: 1.45, last: 90.95, high: 91.00, low: 89.45, open: 89.65, volume: '1683140743', time: '17:45:05' },
-  ];
+  marketData = [];
   marketNames: string[] = [];
 
   searchControl = new FormControl();
@@ -42,10 +37,17 @@ export class WatchListComponent {
       map(value => this._filter(value))
     ).subscribe(filtered => this.filteredOptions = filtered);
 
-
-    this.service.getMarketStocks(this.marketNames).subscribe(response => {
+    this.service.getWatchList().subscribe(response => {
       if(response.isSuccessful){
-        this.marketData = response.message;
+        this.marketNames = response.message;
+        this.service.getMarketStocks(this.marketNames).subscribe(response => {
+          if(response.isSuccessful){
+            this.marketData = response.message;
+          }
+          else{
+            this.service.showSnackBar(response.message,'error');
+          }
+        });
       }
       else{
         this.service.showSnackBar(response.message,'error');
@@ -80,9 +82,16 @@ export class WatchListComponent {
     const selectedMarket = event.option.value;
     this.marketNames.push(selectedMarket + ".IS");
 
-    this.service.getMarketStocks(this.marketNames).subscribe(response => {
+    this.service.addWatchListStock(selectedMarket+ ".IS").subscribe(response => {
       if(response.isSuccessful){
-        this.marketData = response.message;
+        this.service.getMarketStocks(this.marketNames).subscribe(response => {
+          if(response.isSuccessful){
+            this.marketData = response.message;
+          }
+          else{
+            this.service.showSnackBar(response.message,'error');
+          }
+        });
       }
       else{
         this.service.showSnackBar(response.message,'error');
@@ -91,14 +100,22 @@ export class WatchListComponent {
   }
 
   deleteRow(index: number): void {
-    this.marketNames.splice(index,1);
-    this.service.getMarketStocks(this.marketNames).subscribe(response => {
+    this.service.removeWatchListStock(this.marketNames[index]).subscribe(response => {
       if(response.isSuccessful){
-        this.marketData = response.message;
+        this.marketNames.splice(index,1);
+        this.service.getMarketStocks(this.marketNames).subscribe(response => {
+          if(response.isSuccessful){
+            this.marketData = response.message;
+          }
+          else{
+            this.service.showSnackBar(response.message,'error');
+          }
+        });
       }
       else{
         this.service.showSnackBar(response.message,'error');
       }
     });
+    
   }
 }

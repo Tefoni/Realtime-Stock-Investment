@@ -67,23 +67,47 @@ export class MainComponent {
         this.currentPortfolioId = this.portfolioIds[0];
         this.setProfitHistoryChart();
         this.setStockDistribution();
+
+        if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
+          this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
+            if(response.isSuccessful){
+              this.stocks = response.stocks;
+              this.portfolioValues = response;
+            }
+            else{
+              this.service.showSnackBar(response.message,'error');
+            }
+          });
+        }
+  
+        if(this.currentSubTabIndex == 1){ // Transactions
+          this.service.getTransactions(this.currentPortfolioId).subscribe(response => {
+            if(response.isSuccessful){
+              this.transactions = response.message;
+            }
+            else{
+              this.service.showSnackBar(response.message,'error');
+            }
+          });
+        }
+
+        this.service.getStockSymbols().subscribe(response => {
+          if(response.isSuccessful){
+            this.stockNames = response.message;
+            this.filterOptions = this.formControl.valueChanges.pipe(
+              startWith(''),map((value: any) => this.filter(value || ''))
+            )
+          }
+          else{
+            this.service.showSnackBar(response.message,'error');
+          }
+        });
       }
       else{
         this.service.showSnackBar(response.message,'error');
       }
     });
 
-    this.service.getStockSymbols().subscribe(response => {
-      if(response.isSuccessful){
-        this.stockNames = response.message;
-        this.filterOptions = this.formControl.valueChanges.pipe(
-          startWith(''),map((value: any) => this.filter(value || ''))
-        )
-      }
-      else{
-        this.service.showSnackBar(response.message,'error');
-      }
-    });
     this.updateSubscription = interval(5000).subscribe(() => {
       if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
