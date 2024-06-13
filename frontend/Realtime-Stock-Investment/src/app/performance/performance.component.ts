@@ -28,11 +28,9 @@ export class PerformanceComponent {
   }
 
   ngOnInit(): void {
-    this.service.performance().subscribe(response => {
+    this.service.performance(localStorage.getItem("portfolioId")).subscribe(response => {
       if(response.isSuccessful){
         this.dataSourcex = response.message;
-        this.dataSourcex.push({ ticker: 'PORTFOLIO', price: 1666.65, perfDay: -1.95, perfMonth: 0 });
-
         this.dataSourcex.forEach(data => {
           this.datas.push({"name": data.ticker,"value": data.perfMonth});
         });

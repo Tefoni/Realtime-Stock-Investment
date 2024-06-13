@@ -109,6 +109,8 @@ export class MainComponent {
     });
 
     this.updateSubscription = interval(5000).subscribe(() => {
+      localStorage.setItem('portfolioId',this.currentPortfolioId.toString());
+
       if(this.currentPortfolioId != 0 ){ // && this.currentSubTabIndex == 0
         this.service.getPortfolio(this.currentPortfolioId).subscribe(response => {
           if(response.isSuccessful){

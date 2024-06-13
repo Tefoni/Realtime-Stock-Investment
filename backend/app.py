@@ -28,7 +28,7 @@ jwt = JWTManager(app)
 db.init_app(app)
 
 
-@app.route('/performance',methods=['GET'])
+@app.route('/performance',methods=['POST'])
 @jwt_required()
 def performance():
     try:
@@ -36,11 +36,35 @@ def performance():
         codes = ["EURTRY=X","USDTRY=X","GC=F","INTEREST"]
         one_month_ago = (datetime.today() - timedelta(days=30)).strftime('%Y-%m-%d')
         one_month_ago_plus1 = (datetime.strptime(one_month_ago, "%Y-%m-%d") + timedelta(days=1)).strftime('%Y-%m-%d')
-        yesterday = (datetime.today() - timedelta(days=10)).strftime('%Y-%m-%d')
 
-        portfolio = 1000
+        if request.get_json()["portfolioId"] != None:
+            portfolio_stocks = getStocksByPortfolioId(request.get_json()["portfolioId"])
+        else:
+            portfolio_stocks = getStocksByPortfolioId(2)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            stock_infos = list(executor.map(getPortfolioStock, portfolio_stocks))
+
+        portfolio = sum(info["marketValue"] for info in stock_infos)
+        endProfit = 0
+        startProfit = 0
+        stock_infos = profitHistoryof_stocks(portfolio_stocks,one_month_ago,(datetime.today()).strftime('%Y-%m-%d'))
+        for stock_info in stock_infos:
+            endProfit += stock_info["profits"][21]["profit"]
+            startProfit += stock_info["profits"][0]["profit"]
+
+        basePortfolio =  portfolio - endProfit + startProfit
+        portfolioPerfMonth = round((portfolio / basePortfolio)*100,2)
+
 
         result = []
+        result.append({
+            "ticker": "PORTFOLIO",
+            "price": round(portfolio, 2),
+            "perfDay": 0,
+            "perfMonth": round(portfolioPerfMonth-100, 2),
+        })     
+
         i = 0
         usd_currentPrice =0
         usd_monthAgoPrice = 0
@@ -62,7 +86,7 @@ def performance():
                 perfMonth = ( (current_price/month_ago_price)*(usd_currentPrice/usd_monthAgoPrice) )*100  -100
                 result.append({
                     "ticker": types[i],
-                    "price": round(portfolio + (portfolio* perfMonth/100), 2),
+                    "price": round(basePortfolio + (basePortfolio* perfMonth/100), 2),
                     "perfDay": round(( (current_price/open_price)*(usd_currentPrice/usd_yesterday_price) )*100  -100, 3),
                     "perfMonth": round(perfMonth, 2),
                 })
@@ -79,7 +103,7 @@ def performance():
                 perfMonth = round(interest_rate/12, 2)
                 result.append({
                     "ticker": types[i],
-                    "price": round(portfolio + (portfolio* perfMonth/100), 2),
+                    "price": round(basePortfolio + (basePortfolio* perfMonth/100), 2),
                     "perfDay": round(interest_rate/365,2),
                     "perfMonth": perfMonth,
                 })
@@ -89,7 +113,7 @@ def performance():
                 perfDay = round( (info["lastPrice"] - info["open"])/info["open"] *100, 2)
                 result.append({
                     "ticker": types[i],
-                    "price": round(portfolio + (portfolio* perfMonth/100), 2),
+                    "price": round(basePortfolio + (basePortfolio* perfMonth/100), 2),
                     "perfDay": round(perfDay,3),
                     "perfMonth": round(perfMonth, 2),
                 })
@@ -454,7 +478,6 @@ def getWatchList():
         watchListStocks = WatchListStocks.query.filter(WatchListStocks.userId == user.id).all()
         stock_names = [stock.stockName for stock in watchListStocks]
         
-        print(stock_names)
         return jsonify({
             "message": stock_names,
             "isSuccessful": True,

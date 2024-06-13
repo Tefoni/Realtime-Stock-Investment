@@ -76,10 +76,13 @@ def getTransactionHistory(transactionHistory):
         "transactionId": transactionHistory.id
     }
 
-def profitHistoryof_stocks(stocks):
+def profitHistoryof_stocks(stocks,startDate = 0,endDate = 0):
     response = []
     for stock in stocks:
-        data = yf.download(stock.symbol, start=stock.createDate, end=datetime.now())
+        if startDate != 0 and endDate != 0:
+            data = yf.download(stock.symbol, start=startDate, end=endDate)
+        else:
+            data = yf.download(stock.symbol, start=stock.createDate, end=datetime.now())
         stock_profits = []
         for row in data.iloc:
             average_cost,amount = getCurrentDateValuesForStock(row.name.date(),stock)
@@ -197,12 +200,8 @@ def getIndice(indice_name):
     soup = BeautifulSoup(response.text, 'html.parser')
     
     # Google Finance için hisse değerini bulmak
-    stock_info = soup.find("div", {"class": "BNeawe iBp4i AP7Wnd"}).text
-    # Regex kullanarak verileri çekme
-
+    stock_info = soup.find('div', {"class": "BNeawe iBp4i AP7Wnd"}).text
     parts = stock_info.split()
-    # İlk kısım, ana değeri temsil eder
-    main_value = float(parts[0].replace(',', ''))
 
     # İkinci kısım değişim değerini ve işaretini temsil eder
     change_sign = 1 if parts[1][0] == '+' else -1
@@ -213,7 +212,7 @@ def getIndice(indice_name):
 
     return {
         "title": indice_name,
-        "value": round(main_value,2),
+        "value": parts[0],
         "change": percentage_value
     }
     
