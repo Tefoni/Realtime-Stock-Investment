@@ -10,8 +10,8 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class StockInvestmentService implements HttpInterceptor  {
-  //private apiUrl = 'https://realtime-stock-investment-simulator-ya3u.onrender.com';
-  private apiUrl = 'http://127.0.0.1:5000';
+  private apiUrl = 'https://realtime-stock-investment-simulator-ya3u.onrender.com';
+  //private apiUrl = 'http://127.0.0.1:5000';
   private token = '';
   localStorageAvailable = false;
   
