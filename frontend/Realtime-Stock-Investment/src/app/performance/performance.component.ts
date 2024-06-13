@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { StockInvestmentService } from '../services/stock-investment.service';
 
 
 export interface PerformanceData {
@@ -18,28 +19,30 @@ export interface PerformanceData {
   styleUrl: './performance.component.css'
 })
 export class PerformanceComponent {
-  datas: any[];
+  datas: any[] = [];
   displayedColumns: string[] = ['ticker', 'price', 'perfDay', 'perfMonth'];
-  dataSourcex: PerformanceData[];
+  dataSourcex: PerformanceData[] = [];
 
-  constructor() {
-    this.dataSourcex = [
-      { ticker: 'USD', price: 1715.2, perfDay: 0.09, perfMonth: 2.94 },
-      { ticker: 'EUR', price: 1643.30, perfDay: -0.33, perfMonth: -1.4 },
-      { ticker: 'PORTFOLIO', price: 1666.65, perfDay: -1.95, perfMonth: 0 },
-      { ticker: 'INTEREST', price: 1740.7, perfDay: 0.125, perfMonth: 3.75 },
-      { ticker: 'GOLD', price: 1682.4, perfDay: 0.11, perfMonth: 1.09 },
-      // Add more data as needed
-    ];
-    this.datas = [
-      { "name": "USD", "value": 2.94 },
-      { "name": "EUR", "value": -1.4 },
-      { "name": "PORTFOLIO", "value": 0.00 },
-      { "name": "INTEREST", "value": 3.75},
-      { "name": "GOLD", "value": 1.09 },
-    ];
+
+  constructor(private service: StockInvestmentService) {
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.service.performance().subscribe(response => {
+      if(response.isSuccessful){
+        this.dataSourcex = response.message;
+        this.dataSourcex.push({ ticker: 'PORTFOLIO', price: 1666.65, perfDay: -1.95, perfMonth: 0 });
+
+        this.dataSourcex.forEach(data => {
+          this.datas.push({"name": data.ticker,"value": data.perfMonth});
+        });
+        this.datas = [...this.datas];
+      }
+      else{
+        this.service.showSnackBar(response.message,'error');
+      }
+    });
+
+  }
 
 }

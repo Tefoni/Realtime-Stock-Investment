@@ -246,6 +246,19 @@ export class StockInvestmentService implements HttpInterceptor  {
     return new Observable<any>;    
   }
 
+  public performance(): Observable<any>{
+    if(this.localStorageAvailable){
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`,
+      });
+      const options = {headers};
+
+      return this.http.get(`${this.apiUrl}/performance`,options);
+    }
+    return new Observable<any>;
+  }
+
   public showSnackBar(message: string, panelClass: string): void {
     const customStyle = panelClass == 'error' ? 'error-snackbar' : 'success-snackbar' 
     const config: MatSnackBarConfig = {

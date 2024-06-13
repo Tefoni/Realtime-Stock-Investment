@@ -4,6 +4,17 @@ import { Observable, Subscription, interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { StockInvestmentService } from '../services/stock-investment.service';
 
+interface MarketData {
+  market: string;
+  last: number;
+  high: number;
+  low: number;
+  open: number;
+  time: string;
+  change: number;
+  volume: string;
+}
+
 @Component({
   selector: 'app-watch-list',
   templateUrl: './watch-list.component.html',
@@ -11,7 +22,7 @@ import { StockInvestmentService } from '../services/stock-investment.service';
 })
 export class WatchListComponent {
   private updateSubscription!: Subscription;
-  marketData = [];
+  marketData: MarketData[] = [];
   marketNames: string[] = [];
 
   searchControl = new FormControl();

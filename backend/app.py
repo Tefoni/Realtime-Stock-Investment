@@ -27,6 +27,82 @@ jwt = JWTManager(app)
 
 db.init_app(app)
 
+
+@app.route('/performance',methods=['GET'])
+@jwt_required()
+def performance():
+    try:
+        types = ["EUR","USD","GOLD","INTEREST"]
+        codes = ["EURTRY=X","USDTRY=X","GC=F","INTEREST"]
+        one_month_ago = (datetime.today() - timedelta(days=30)).strftime('%Y-%m-%d')
+        one_month_ago_plus1 = (datetime.strptime(one_month_ago, "%Y-%m-%d") + timedelta(days=1)).strftime('%Y-%m-%d')
+        yesterday = (datetime.today() - timedelta(days=10)).strftime('%Y-%m-%d')
+
+        portfolio = 1000
+
+        result = []
+        i = 0
+        usd_currentPrice =0
+        usd_monthAgoPrice = 0
+        usd_yesterday_price = 0
+        for code in codes:
+            if code != "INTEREST":
+                info = yf.Ticker(code)
+                history = info.history(start=one_month_ago, end=one_month_ago_plus1)
+                month_ago_price = history['Close'].iloc[-1]
+                current_price = info.basic_info["lastPrice"]
+                open_price = info.basic_info["open"]
+
+            if code == "USDTRY=X":
+                usd_currentPrice = current_price
+                usd_monthAgoPrice = month_ago_price
+                usd_yesterday_price = open_price
+
+            if code == "GC=F":
+                perfMonth = ( (current_price/month_ago_price)*(usd_currentPrice/usd_monthAgoPrice) )*100  -100
+                result.append({
+                    "ticker": types[i],
+                    "price": round(portfolio + (portfolio* perfMonth/100), 2),
+                    "perfDay": round(( (current_price/open_price)*(usd_currentPrice/usd_yesterday_price) )*100  -100, 3),
+                    "perfMonth": round(perfMonth, 2),
+                })
+            elif code == "INTEREST":
+                url = "https://www.google.com/search?q=Turkey+interest+rate"
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                }
+                response = requests.get(url, headers=headers)
+                soup = BeautifulSoup(response.text, 'html.parser')
+
+                # Arama sonucundaki faiz oranını içeren HTML etiketini bul
+                interest_rate = float(soup.find('div', class_='IZ6rdc').text.replace('%',''))
+                perfMonth = round(interest_rate/12, 2)
+                result.append({
+                    "ticker": types[i],
+                    "price": round(portfolio + (portfolio* perfMonth/100), 2),
+                    "perfDay": round(interest_rate/365,2),
+                    "perfMonth": perfMonth,
+                })
+            else:
+                info = info.basic_info
+                perfMonth = round( (current_price/month_ago_price) * 100, 2) - 100
+                perfDay = round( (info["lastPrice"] - info["open"])/info["open"] *100, 2)
+                result.append({
+                    "ticker": types[i],
+                    "price": round(portfolio + (portfolio* perfMonth/100), 2),
+                    "perfDay": round(perfDay,3),
+                    "perfMonth": round(perfMonth, 2),
+                })
+            i += 1
+
+
+        return jsonify({"message": result,
+                        "isSuccessful": True})
+    except Exception as e:
+        return jsonify({"message": str(e),
+                        "isSuccessful": False})
+
+
 @app.route('/getMarketStocks',methods=['POST'])
 @jwt_required()
 def getMarketStocks():

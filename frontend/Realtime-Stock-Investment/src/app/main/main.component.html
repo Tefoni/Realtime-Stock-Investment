@@ -235,36 +235,39 @@
           </table>         
         </mat-tab>
     
-        <mat-tab [label] = "'İstatistikler'" style="background-color: #22262F;">
-          <div  class="graph" style="background-color: #22262F;">
-            <h1 style="display: flex;justify-content: center;padding-top: 3%;">Gelir (K/Z)</h1>
-            <div style="display: flex;justify-content: center;" class="button-container">
-              <button class="time-filter-button" (click)="toggleViewMode('lastWeek')">1H</button>
-              <button class="time-filter-button" (click)="toggleViewMode('lastMonth')">1A</button>
-              <button class="time-filter-button" (click)="toggleViewMode('max')">Maks.</button>
+        <mat-tab [label] = "'İstatistikler'">
+          <div style="background-color: #22262F;">
+            <div  class="graph">
+              <h1 style="display: flex;justify-content: center;padding-top: 3%;">Gelir (K/Z)</h1>
+              <div style="display: flex;justify-content: center;" class="button-container">
+                <button class="time-filter-button" (click)="toggleViewMode('lastWeek')">1H</button>
+                <button class="time-filter-button" (click)="toggleViewMode('lastMonth')">1A</button>
+                <button class="time-filter-button" (click)="toggleViewMode('max')">Maks.</button>
+              </div>
+              <div>
+                <canvas baseChart
+                        [datasets]="currentGraphData"
+                        [labels]="currentGraphDates"
+                        [legend]="true"
+                        [type]="'line'"
+                        [options]="profitChartOptions">
+                </canvas>
+              </div>
             </div>
-            <div>
-              <canvas baseChart
-                      [datasets]="currentGraphData"
-                      [labels]="currentGraphDates"
-                      [legend]="true"
-                      [type]="'line'"
-                      [options]="profitChartOptions">
-              </canvas>
+            <div style="margin: auto; width: 60%;">
+              <h1 style="display: flex;justify-content: center;padding-top: 3%;">Varlık Paylaşımı</h1>
+              <div>
+                <canvas baseChart
+                        [datasets]="[{ data: pieChartData }]"
+                        [labels]="pieChartLabels"
+                        [legend]="true"
+                        [type]="'pie'"
+                        [options]="pieChartOptions">
+                </canvas>
+              </div>
             </div>
           </div>
-          <div style="margin: auto; width: 60%; background-color: #22262F;">
-            <h1 style="display: flex;justify-content: center;padding-top: 3%;">Varlık Paylaşımı</h1>
-            <div>
-              <canvas baseChart
-                      [datasets]="[{ data: pieChartData }]"
-                      [labels]="pieChartLabels"
-                      [legend]="true"
-                      [type]="'pie'"
-                      [options]="pieChartOptions">
-              </canvas>
-            </div>
-          </div>
+
         </mat-tab>
     
       </mat-tab-group>
