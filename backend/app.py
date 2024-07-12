@@ -50,12 +50,11 @@ def performance():
         startProfit = 0
         stock_infos = profitHistoryof_stocks(portfolio_stocks,one_month_ago,(datetime.today()).strftime('%Y-%m-%d'))
         for stock_info in stock_infos:
-            endProfit += stock_info["profits"][21]["profit"]
-            startProfit += stock_info["profits"][0]["profit"]
+            endProfit += float(stock_info["profits"][len(stock_info["profits"])-1]["profit"])
+            startProfit += float(stock_info["profits"][0]["profit"])
 
         basePortfolio =  portfolio - endProfit + startProfit
         portfolioPerfMonth = round((portfolio / basePortfolio)*100,2)
-
 
         result = []
         result.append({
@@ -99,7 +98,8 @@ def performance():
                 soup = BeautifulSoup(response.text, 'html.parser')
 
                 # Arama sonucundaki faiz oranını içeren HTML etiketini bul
-                interest_rate = float(soup.find('div', class_='IZ6rdc').text.replace('%',''))
+                #interest_rate = float(soup.find('div', class_='IZ6rdc').text.replace('%',''))
+                interest_rate = 50
                 perfMonth = round(interest_rate/12, 2)
                 result.append({
                     "ticker": types[i],
@@ -162,8 +162,8 @@ def getAllBIST():
         stocksOutput_sorted = sorted(stocksOutput, key=lambda x: x['change'])
 
         output = {
-            "topGainers": stocksOutput_sorted[-20:][::-1],
-            "topLosers": stocksOutput_sorted[:20],
+            "topGainers": stocksOutput_sorted[-10:][::-1],
+            "topLosers": stocksOutput_sorted[:10],
             "indices": sectorIndices,
             "indexItems": indexItems
         }
